@@ -53,6 +53,7 @@ class BuildContext:
         self.ANTICACHE_NVM = False
         self.ANTICACHE_DRAM = False
         self.ARIES= False
+        self.FINELINE = False
         self.ANTICACHE_COUNTER = False
         self.ANTICACHE_TIMESTAMPS = True
         self.ANTICACHE_TIMESTAMPS_PRIME = True
@@ -80,6 +81,10 @@ class BuildContext:
                 parts = arg.split("=")
                 if len(parts) > 1 and not (parts[1].startswith("${")):
                     self.ARIES = strtobool(parts[1])
+            if arg.startswith("FINELINE="):
+                parts = arg.split("=")
+                if len(parts) > 1 and not (parts[1].startswith("${")):
+                    self.FINELINE = bool(parts[1])
             if arg.startswith("ANTICACHE_ENABLE="):
                 parts = arg.split("=")
                 if len(parts) > 1 and not (parts[1].startswith("${")):

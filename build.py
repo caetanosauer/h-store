@@ -4,6 +4,8 @@
 import os, sys, subprocess, string, glob
 from buildtools import *
 
+from contextlib import contextmanager
+
 # usage:
 # The following all work as you might expect:
 # python build.py
@@ -391,6 +393,13 @@ if CTX.STORAGE_MMAP:
 
 if CTX.ARIES:
     CTX.CPPFLAGS += " -DARIES"
+
+###############################################################################
+# FINELINE
+###############################################################################
+
+if CTX.FINELINE:
+    CTX.CPPFLAGS += " -DFINELINE"
  
 ###############################################################################
 # ANTI-CACHING
@@ -486,6 +495,44 @@ retval = os.system("make --directory=%s -j%d nativelibs/libvoltdb.sym" % (CTX.OU
 print("Make returned: ", retval)
 if retval != 0:
     sys.exit(-1)
+
+print()
+retval = os.system("make --directory=%s -j%d nativelibs/libvoltdb.sym" % (CTX.OUTPUT_PREFIX, numHardwareThreads))
+print("Make returned: ", retval)
+if retval != 0:
+    sys.exit(-1)
+
+###############################################################################
+# FINELINE
+###############################################################################
+@contextmanager
+def pushd(newDir):
+    previousDir = os.getcwd()
+    os.chdir(newDir)
+    yield
+    os.chdir(previousDir)
+
+if CTX.FINELINE:
+    print()
+    print("Building FineLine logging and recovery")
+    flPath = "src/ee/fineline/build"
+    if not os.path.exists(flPath):
+        os.mkdir(flPath)
+
+    with pushd(flPath):
+        cmakeArgs = ""
+        if CTX.LEVEL == "DEBUG":
+            cmakeArgs = "-DCMAKE_BUILD_TYPE=Debug3"
+
+        retval = os.system("cmake .. %s" % cmakeArgs)
+        print("CMake returned: ", retval)
+        if retval != 0:
+            sys.exit(-1)
+
+        retval = os.system("make -j%d fineline" % numHardwareThreads)
+        print("Make returned: ", retval)
+        if retval != 0:
+            sys.exit(-1)
 
 ###############################################################################
 # RUN THE TESTS IF ASKED TO
