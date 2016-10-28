@@ -79,12 +79,14 @@ CTX.OUTPUT_PREFIX += "/"
 # these are the base compile options that get added to every compile step
 # this does not include header/lib search paths or specific flags for
 #  specific targets
-CTX.CPPFLAGS = """-Wall -Wextra -Werror -Woverloaded-virtual -Wconversion
+CTX.CPPFLAGS = """-std=c++14 -Wall -Wextra -Werror -Woverloaded-virtual -Wconversion
             -Wpointer-arith -Wcast-qual -Wcast-align -Wwrite-strings
             -Winit-self -Wno-sign-compare -Wno-unused-parameter
             -pthread
             -D__STDC_CONSTANT_MACROS -D__STDC_LIMIT_MACROS -DNOCLOCK
+            -D_GLIBCXX_USE_CXX11_ABI=0
             -fno-omit-frame-pointer
+            -fno-strict-aliasing
             -fvisibility=hidden -DBOOST_SP_DISABLE_THREADS"""
 
 if (gcc_major == 4 and gcc_minor >= 3) or (gcc_major == 5):
