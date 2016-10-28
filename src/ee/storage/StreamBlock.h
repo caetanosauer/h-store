@@ -44,7 +44,7 @@ namespace voltdb
         /**
          * Returns a pointer to the first unreleased octet in the block
          */
-        const char* const dataPtr() const {
+        const char* dataPtr() const {
             return m_data + m_releaseOffset;
         }
 
@@ -52,7 +52,7 @@ namespace voltdb
          * Returns the universal stream offset of the block not
          * including any of the octets in this block.
          */
-        const size_t uso() const {
+        size_t uso() const {
             return m_uso;
         }
 
@@ -61,21 +61,21 @@ namespace voltdb
          * octets in this block.  uso() + offset() will compute the
          * universal stream offset for the entire block.
          */
-        const size_t offset() const {
+        size_t offset() const {
             return m_offset;
         }
 
         /**
          * Number of bytes left in the buffer
          */
-        const size_t remaining() const {
+        size_t remaining() const {
             return m_capacity - m_offset;
         }
 
         /**
          * Returns the USO of the first unreleased octet in this block
          */
-        const size_t unreleasedUso()
+        size_t unreleasedUso()
         {
             return m_uso + m_releaseOffset;
         }
@@ -83,7 +83,7 @@ namespace voltdb
         /**
          * Returns the size of the unreleased data in this block.
          */
-        const size_t unreleasedSize()
+        size_t unreleasedSize()
         {
             return m_offset - m_releaseOffset;
         }
