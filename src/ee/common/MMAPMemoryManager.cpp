@@ -119,9 +119,11 @@
 
    MMAPMemoryManager::~MMAPMemoryManager() {
 
+     // Destructors should not throw exceptions -- calling abort() instead
      if (pthread_mutex_lock(&m_mutex)) {
        VOLT_ERROR("Failed to lock mutex in MMAPMemoryManager::~MemoryManager()\n");
-       throwFatalException("Failed to lock mutex.");
+       // throwFatalException("Failed to lock mutex.");
+       abort();
      }
 
      int ret;
@@ -131,7 +133,8 @@
 
        if(ret != 0){
 	 VOLT_ERROR("MUNMAP : initialization error.");
-	 throwFatalException("MUNMAP : initialization error.");
+	 // throwFatalException("MUNMAP : initialization error.");
+         abort();
        }
      }
 
@@ -140,7 +143,8 @@
 
      if (pthread_mutex_unlock(&m_mutex)) {
        VOLT_ERROR("Failed to unlock mutex in MMAPMemoryManager::~MemoryManager()\n");
-       throwFatalException("Failed to unlock mutex.");
+       // throwFatalException("Failed to unlock mutex.");
+       abort();
      }
    }
 
