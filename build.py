@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-import os, sys, commands, string, glob
+import os, sys, subprocess, string, glob
 from buildtools import *
 
 # usage:
@@ -141,7 +141,7 @@ CTX.JNILIBFLAGS += " -shared"
 CTX.SOFLAGS += " -shared"
 CTX.SOEXT = "so"
 out = Popen('java -cp tools/ SystemPropertyPrinter java.library.path'.split(),
-            stdout = PIPE).communicate()[0]
+            stdout = PIPE).communicate()[0].decode()
 libpaths = ' '.join( '-L' + path for path in out.strip().split(':') if path != '' and path != '/usr/lib' )
 CTX.JNIBINFLAGS += " " + libpaths
 CTX.JNIBINFLAGS += " -ljava -ljvm -lverify"
@@ -447,9 +447,9 @@ if CTX.ANTICACHE_BUILD:
 # BUILD THE MAKEFILE
 ###############################################################################
 
-#print "TARGET PLATFORM: ", CTX.PLATFORM, "-", CTX.PLATFORM_VERSION
-#print "CPPFLAGS: ", CTX.CPPFLAGS
-#print sys.stdout.flush()
+#print("TARGET PLATFORM: ", CTX.PLATFORM, "-", CTX.PLATFORM_VERSION)
+#print("CPPFLAGS: ", CTX.CPPFLAGS)
+#print(sys.stdout.flush())
 
 # this function (in buildtools.py) generates the makefile
 # it's currently a bit ugly but it'll get cleaned up soon
@@ -462,24 +462,26 @@ numHardwareThreads = 4
 
 if CTX.PLATFORM == "Darwin":
     numHardwareThreads = 0
-    output = commands.getstatusoutput("sysctl hw.ncpu")
-    numHardwareThreads = int(string.strip(string.split(output[1])[1]))
+    output = subprocess.getstatusoutput("sysctl hw.ncpu")
+    # numHardwareThreads = int(string.strip(string.split(output[1])[1])) # only works in python2
+    numHardwareThreads = int(output[1].split()[1].strip())
 elif CTX.PLATFORM == "Linux":
     numHardwareThreads = 0
     for line in open('/proc/cpuinfo').readlines():
-        name_value = map(string.strip, string.split(line, ':', 1))
+        # name_value = map(string.strip, string.split(line, ':', 1)) # only works in python2
+        name_value = [x.strip() for x in line.split(':', 1)]
         if len(name_value) != 2:
             continue
         name,value = name_value
         if name == "processor":
             numHardwareThreads = numHardwareThreads + 1
 else:
-    print "WARNING: Unsupported platform type '%s'" % CTX.PLATFORM
-print "Detected %d hardware threads to use during the build" % (numHardwareThreads)
+    print("WARNING: Unsupported platform type '%s'" % CTX.PLATFORM)
+print("Detected %d hardware threads to use during the build" % (numHardwareThreads))
 
-print 
+print()
 retval = os.system("make --directory=%s -j%d nativelibs/libvoltdb.sym" % (CTX.OUTPUT_PREFIX, numHardwareThreads))
-print "Make returned: ", retval
+print("Make returned: ", retval)
 if retval != 0:
     sys.exit(-1)
 

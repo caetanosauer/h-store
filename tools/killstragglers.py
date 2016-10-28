@@ -4,7 +4,7 @@
 import os
 import sys
 import re
-import commands
+import subprocess
 import logging
 import getopt
 #from pprint import pprint
@@ -86,7 +86,7 @@ if __name__ == '__main__':
 
     ## Get the list of PIDS -> Commands
     cmd = "ps x -o pid -o command"
-    (result, output) = commands.getstatusoutput(cmd)
+    (result, output) = subprocess.getstatusoutput(cmd)
     assert result == 0, "%s\n%s" % (cmd, output)
     pids = { }
     for match in PS_REGEX.finditer(output):
@@ -138,9 +138,9 @@ if __name__ == '__main__':
         for pid in to_kill:
             cmd = "kill -9 %d" % pid
             if OPT_DRYRUN:
-                print cmd
+                print(cmd)
             else:
-                commands.getstatusoutput(cmd)
+                subprocess.getstatusoutput(cmd)
         ## FOR
     else:
         logging.debug("We didn't find any straggler processes to kill!")

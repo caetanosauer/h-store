@@ -125,7 +125,7 @@ try:
     version = readFile("version.txt")
     version = version.strip()
 except:
-    print "ERROR: Unable to read version number from version.txt."
+    print("ERROR: Unable to read version number from version.txt.")
     sys.exit(-1)
 baselibname = "libvoltdb"
     
@@ -155,12 +155,12 @@ def getDependencies(filename, cppflags, sysprefixes):
     command = "g++ %s -MM %s" % (cppflags, filename)
 
     pipe = Popen(args=command, shell=True, bufsize=-1, stdout=PIPE, stderr=PIPE)
-    out = pipe.stdout.readlines()
-    out_err = pipe.stderr.readlines()
+    out = [x.decode() for x in pipe.stdout.readlines()]
+    out_err = [x.decode() for x in pipe.stderr.readlines()]
     retcode = pipe.wait()
     if retcode != 0:
-        print "Error Determining Dependencies for: %s" % (filename)
-        print ''.join(out_err)
+        print("Error Determining Dependencies for: %s" % (filename))
+        print(''.join(out_err))
         sys.exit(-1)
 
     if len(out) > 0:
@@ -233,7 +233,7 @@ def buildMakefile(CTX):
         input = CTX.TESTS[dir].split()
         tests += [TEST_PREFIX + "/" + dir + "/" + x for x in input]
 
-    makefile = file(OUTPUT_PREFIX + "/makefile", 'w')
+    makefile = open(OUTPUT_PREFIX + "/makefile", 'w')
     makefile.write("CC = gcc\n")
     makefile.write("CXX = g++\n")
     makefile.write("CPPFLAGS += %s\n" % (MAKECPPFLAGS))
@@ -428,11 +428,11 @@ def runTests(CTX):
                     if str.find("All heap blocks were freed") != -1:
                         allHeapBlocksFreed = True
                 if not allHeapBlocksFreed:
-                    print "Not all heap blocks were freed"
+                    print("Not all heap blocks were freed")
                     retval = -1
                 if retval == -1:
                     for str in out_err:
-                        print str
+                        print(str)
                 sys.stdout.flush()
             else:
                 retval = os.system(targetpath)
@@ -441,20 +441,20 @@ def runTests(CTX):
         else:
             failedTests += [binname]
             failures += 1
-    print "==============================================================================="
-    print "TESTING COMPLETE (PASSED: %d, FAILED: %d)" % (successes, failures)
+    print("===============================================================================")
+    print("TESTING COMPLETE (PASSED: %d, FAILED: %d)" % (successes, failures))
     for test in failedTests:
-        print "TEST: " + test + " in DIRECTORY: " + CTX.OUTPUT_PREFIX + " FAILED"
+        print("TEST: " + test + " in DIRECTORY: " + CTX.OUTPUT_PREFIX + " FAILED")
     if failures == 0:
-        print "*** SUCCESS ***"
+        print("*** SUCCESS ***")
     else:
-        print "!!! FAILURE !!!"
-    print "==============================================================================="
+        print("!!! FAILURE !!!")
+    print("===============================================================================")
 
     return failures
 
 def getGCCVersion():
-    vinfo = output = Popen(["gcc", "-v"], stderr=PIPE).communicate()[1]
+    vinfo = output = Popen(["gcc", "-v"], stderr=PIPE).communicate()[1].decode()
     vinfo = vinfo.strip().split("\n")
     vinfo = vinfo[-1]
     vinfo = vinfo.split()[2]

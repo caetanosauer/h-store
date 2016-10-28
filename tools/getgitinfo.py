@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/env python
 from subprocess import Popen, PIPE
 import sys
 import re
@@ -14,10 +14,10 @@ def getSvnInfo():
 
     # svn status returns an error if you're not in a repository
     if stderr:
-        print "This not an svn working copy"
+        print("This not an svn working copy")
         return
     if svnStatus:
-        print "This is a dirty svn working copy"
+        print("This is a dirty svn working copy")
         dirty = "-dirty"
 
     (svnInfo,stderr) = Popen("svn info 2>/dev/null",shell=True, stdout=PIPE).communicate()
@@ -42,13 +42,13 @@ def getGitInfo():
     # need to do a 'git diff' because 'describe --dirty' can get confused by timestamps
     (gitLocalVersion,stderr) = Popen("git diff --shortstat", shell=True, stdout=PIPE, stderr=PIPE).communicate()
     if stderr:
-        print "This is not a git working tree\n"
+        print("This is not a git working tree\n")
         return
     
     # git describe --dirty adds '-dirty' to the version string if uncommitted code is found
     (gitLocalVersion,stderr) = Popen("git describe --long --dirty", shell=True, stdout=PIPE, stderr=PIPE).communicate()
     if stderr:
-        print "This is not a git working tree\n"
+        print("This is not a git working tree\n")
         return
 
     # jenkins puts in local tags - look backwards until a non-jenkins tag is found
@@ -59,7 +59,7 @@ def getGitInfo():
         (gitLocalVersion,stderr) = Popen("git describe --long %s^1" % gitLocalVersion, 
                                          shell=True, stdout=PIPE, stderr=PIPE).communicate()
         if stderr:
-            print stderr
+            print(stderr)
             break
 
     gitLocalVersion = gitLocalVersion.strip()
@@ -68,7 +68,7 @@ def getGitInfo():
     (gitLocalBranch, stderr) = Popen("git name-rev --name-only HEAD", 
                                          shell=True, stdout=PIPE, stderr=PIPE).communicate()
     gitLocalBranch = gitLocalBranch.strip()
-    #print "git config --get branch.%s.remote" % (gitLocalBranch)
+    #print("git config --get branch.%s.remote" % (gitLocalBranch))
 
     (gitRemote, stderr) = Popen("git config --get branch.%s.remote" % (gitLocalBranch), 
                                     shell=True, stdout=PIPE, stderr=PIPE).communicate()
@@ -104,5 +104,5 @@ if __name__ == "__main__":
     bfile.close()
 
 
-    print "Version: ",version,buildstring
+    print("Version: ",version,buildstring)
 

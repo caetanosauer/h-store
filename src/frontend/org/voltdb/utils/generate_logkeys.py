@@ -51,7 +51,7 @@ auto_gen_warning = \
             ALL CHANGES MUST BE MADE IN voltdb_logstrings.properties GENERATOR */
 """
 
-f = file( "LogKeys.java", 'w' )
+f = open( "LogKeys.java", 'w' )
 f.truncate(0)
 f.seek(0)
 if not f:
