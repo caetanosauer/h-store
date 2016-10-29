@@ -165,7 +165,7 @@ public class ProcedureStatistics extends AbstractStatistics<Procedure> {
                     this.proc_param_histograms.get(i).put(value);
                 } // FOR
             } else {
-                this.proc_param_histograms.get(i).put(xact.getParam(i));
+                this.proc_param_histograms.get(i).put(xact.<Object>getParam(i));
             }
         } // FOR
 
