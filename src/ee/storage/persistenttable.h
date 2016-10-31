@@ -84,11 +84,11 @@ class ReferenceSerializeOutput;
 class ExecutorContext;
 class MaterializedViewMetadata;
 class RecoveryProtoMsg;
-    
+
 #ifdef ANTICACHE
 class EvictedTable;
 class NVMEvictedTable;
-class AntiCacheEvictionManager; 
+class AntiCacheEvictionManager;
 class EvictionIterator;
 #endif
 
@@ -123,7 +123,7 @@ class PersistentTable : public Table {
     friend class TableIndex;
     friend class TableIterator;
     friend class PersistentTableStats;
-    
+
 #ifdef ANTICACHE
     friend class AntiCacheEvictionManager;
     friend class IndexScanExecutor;
@@ -265,7 +265,7 @@ class PersistentTable : public Table {
         if (m_wrapper)
             m_wrapper->setBytesUsed(streamBytesUsed);
     }
-    
+
     // ------------------------------------------------------------------
     // ANTI-CACHING OPERATIONS
     // ------------------------------------------------------------------
@@ -275,12 +275,12 @@ class PersistentTable : public Table {
     void setNVMEvictedTable(voltdb::Table *evictedTable);
     voltdb::Table* getNVMEvictedTable();
     // needed for LRU chain eviction
-    void setNewestTupleID(uint32_t id); 
-    void setOldestTupleID(uint32_t id); 
-    uint32_t getNewestTupleID(); 
+    void setNewestTupleID(uint32_t id);
+    void setOldestTupleID(uint32_t id);
+    uint32_t getNewestTupleID();
     uint32_t getOldestTupleID();
     void setNumTuplesInEvictionChain(int num_tuples);
-    int getNumTuplesInEvictionChain(); 
+    int getNumTuplesInEvictionChain();
     AntiCacheDB* getAntiCacheDB(int level);
     std::map<int32_t, int32_t> getUnevictedBlockIDs();
     std::vector<char*> getUnevictedBlocks();
@@ -323,16 +323,16 @@ class PersistentTable : public Table {
     #endif
 
     void updateStringMemory(int tupleStringMemorySize);
-    
+
     void setEntryToNewAddressForAllIndexes(const TableTuple *tuple, const void* address, const void* oldAddress);
 
 protected:
     virtual void allocateNextBlock();
-    
+
     size_t allocatedBlockCount() const {
         return m_data.size();
     }
-    
+
     // ------------------------------------------------------------------
     // FROM PIMPL
     // ------------------------------------------------------------------
@@ -344,7 +344,7 @@ protected:
     bool tryUpdateOnAllIndexes(TableTuple &targetTuple, const TableTuple &sourceTuple);
 
     bool checkNulls(TableTuple &tuple) const;
-    
+
     size_t appendToELBuffer(TableTuple &tuple, int64_t seqNo, TupleStreamWrapper::Type type);
 
     PersistentTable(ExecutorContext *ctx, bool exportEnabled);
@@ -381,39 +381,39 @@ protected:
     // temporary for tuplestream stuff
     TupleStreamWrapper *m_wrapper;
     int64_t m_tsSeqNo;
-    
+
     // ANTI-CACHE VARIABLES
     #ifdef ANTICACHE
     voltdb::Table *m_evictedTable;
     voltdb::Table *m_NVMEvictedTable;
-    
-    std::map<int32_t, int32_t> m_unevictedBlockIDs; 
+
+    std::map<int32_t, int32_t> m_unevictedBlockIDs;
 //    std::vector<int16_t> m_unevictedBlockIDs;
     std::vector<char*> m_unevictedBlocks;
-    std::vector<int32_t> m_mergeTupleOffset; 
+    std::vector<int32_t> m_mergeTupleOffset;
     std::vector<int32_t> m_blockIDs;
-    
-    std::map<int, int> m_unevictedTuplesPerBlocks; 
 
-    char* m_unevictedTuples; 
-    int m_numUnevictedTuples; 
-    
-    uint32_t m_oldestTupleID; 
-    uint32_t m_newestTupleID; 
-    
+    std::map<int, int> m_unevictedTuplesPerBlocks;
+
+    char* m_unevictedTuples;
+    int m_numUnevictedTuples;
+
+    uint32_t m_oldestTupleID;
+    uint32_t m_newestTupleID;
+
     int m_numTuplesInEvictionChain;
-    
+
     bool m_blockMerge;
     bool m_batchEvicted;
-    
+
     int m_read_pivot;
     int m_merge_pivot;
 
     #endif
-    
+
     // partition key
     int m_partitionColumn;
-    
+
     // Partition id of where this table is stored in
     int32_t m_partitionId;
 
@@ -426,7 +426,7 @@ protected:
 
     // is Export enabled
     bool m_exportEnabled;
-    
+
     // Snapshot stuff
     boost::scoped_ptr<CopyOnWriteContext> m_COWContext;
 
@@ -439,7 +439,7 @@ inline TableTuple& PersistentTable::getTempTupleInlined(TableTuple &source) {
     m_tempTuple.copy(source);
     return m_tempTuple;
 }
- 
+
 inline void PersistentTable::allocateNextBlock() {
 #ifdef MEMCHECK
     int bytes = m_schema->tupleLength() + TUPLE_HEADER_SIZE;
