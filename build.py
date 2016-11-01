@@ -107,6 +107,13 @@ if CTX.COVERAGE:
 # this is where the build will look for header files
 # - the test source will also automatically look in the test root dir
 CTX.INCLUDE_DIRS = ['src/ee']
+if CTX.FINELINE:
+    # add include folders for fineline (TODO: read it from CMake properties)
+    CTX.INCLUDE_DIRS += ['src/ee/fineline/src',
+            'src/ee/fineline/foster-btree/src', 
+            'src/ee/fineline/foster-btree/third-party/spdlog/include'
+    ]
+
 CTX.SYSTEM_DIRS = [
     'third_party/cpp',
 ]

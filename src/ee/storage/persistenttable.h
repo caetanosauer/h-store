@@ -70,6 +70,10 @@
 #include "storage/CopyOnWriteContext.h"
 #include "storage/RecoveryContext.h"
 
+#ifdef FINELINE
+#include "fineline/src/fineline.h"
+#endif
+
 
 namespace voltdb {
 
