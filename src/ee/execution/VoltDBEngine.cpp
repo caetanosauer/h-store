@@ -314,7 +314,7 @@ int VoltDBEngine::executeQuery(int64_t planfragmentId,
     // execution lists for planfragments are cached by planfragment id
     assert(planfragmentId >= -1);
 //     fprintf(stderr, "Looking to execute fragid %jd\n", (intmax_t)planfragmentId);
-//     
+//
 //     std::map<int64_t, boost::shared_ptr<ExecutorVector> >::const_iterator pavlo_it;
 //     fprintf(stderr, "-----------------------------\n");
 //     for (pavlo_it = m_executorMap.begin();
@@ -335,7 +335,7 @@ int VoltDBEngine::executeQuery(int64_t planfragmentId,
                 m_executorContext->getTrackerManager();
         tracker = trackerMgr->getTracker(txnId);
     }
-    
+
     // PAVLO: If we see a SendPlanNode with the "fake" flag set to true,
     // then we won't really execute it and instead will send back the
     // number of tuples that we modified
@@ -348,7 +348,7 @@ int VoltDBEngine::executeQuery(int64_t planfragmentId,
     // MA: Set the default value of m_update_access. If we have update/delete operation,
     // then we need to bring back the tuple to memory anyway if it's evicted.
     if (m_executorContext->getAntiCacheEvictionManager() != NULL) {
-        m_executorContext->getAntiCacheEvictionManager()->m_update_access = 
+        m_executorContext->getAntiCacheEvictionManager()->m_update_access =
             false;
 
         for (int ctr = 0; ctr < ttl; ++ctr) {
@@ -356,7 +356,7 @@ int VoltDBEngine::executeQuery(int64_t planfragmentId,
             PlanNodeType nodeType = executor->getPlanNode()->getPlanNodeType();
             VOLT_TRACE("nodeType: %d\n", nodeType);
             if (nodeType == PLAN_NODE_TYPE_UPDATE || nodeType == PLAN_NODE_TYPE_DELETE)
-                m_executorContext->getAntiCacheEvictionManager()->m_update_access = 
+                m_executorContext->getAntiCacheEvictionManager()->m_update_access =
                 true;
         }
     }
@@ -855,7 +855,7 @@ bool VoltDBEngine::rebuildTableCollections() {
                 // Pay attention here because this is important!
                 // Because the relative indexes for the catalog objects are based on
                 // their parent object, that means that we can't use the indexes' relativeIndex
-                // field to uniquely identify them because they are overwritten for 
+                // field to uniquely identify them because they are overwritten for
                 // each table. So this means that we have to generate a composite
                 // key of the table's relativeIndex + index's relativeIndex so that can
                 // uniquely identify them. The Java layer doesn't need to know
@@ -1301,10 +1301,10 @@ int VoltDBEngine::getStats(int selector, int locators[], int numLocators,
                     throw SerializableEEException(
                             VOLT_EE_EXCEPTION_TYPE_EEEXCEPTION, message);
                 }
-                
+
                 // Create the composite keys for this table
                 catalog::Table *catTable = m_database->tables().get(m_tables[tableId]->name());
-                
+
                 map<string, catalog::Index*>::const_iterator idx_iterator;
                 for (idx_iterator = catTable->indexes().begin();
                         idx_iterator != catTable->indexes().end(); idx_iterator++) {
@@ -2081,13 +2081,13 @@ int VoltDBEngine::trackingTupleSet(int64_t txnId, bool writes) {
 
 #ifdef ANTICACHE
 void VoltDBEngine::antiCacheInitialize(std::string dbDir, AntiCacheDBType dbType, bool blocking, long blockSize, long maxSize, bool blockMerge) const {
-    VOLT_INFO("Enabling type %d (blocking: %d/blockMerge: %d) Anti-Cache at Partition %d: dir=%s / blockSize=%ld max=%ld", 
+    VOLT_INFO("Enabling type %d (blocking: %d/blockMerge: %d) Anti-Cache at Partition %d: dir=%s / blockSize=%ld max=%ld",
             (int)dbType, (int)blocking, (int)blockMerge, m_partitionId, dbDir.c_str(), blockSize, maxSize);
     m_executorContext->enableAntiCache(this, dbDir, blockSize, dbType, blocking, maxSize, blockMerge);
 }
 
 void VoltDBEngine::antiCacheAddDB(std::string dbDir, AntiCacheDBType dbType, bool blocking, long blockSize, long maxSize, bool blockMerge) const {
-    VOLT_INFO("Adding type %d (blocking: %d/blockMerge: %d) Anti-Cache at Partition %d: dir=%s / blockSize=%ld max=%ld", 
+    VOLT_INFO("Adding type %d (blocking: %d/blockMerge: %d) Anti-Cache at Partition %d: dir=%s / blockSize=%ld max=%ld",
             (int)dbType, (int)blocking, (int)blockMerge, m_partitionId, dbDir.c_str(), blockSize, maxSize);
     m_executorContext->addAntiCacheDB(dbDir, blockSize, dbType, blocking, maxSize, blockMerge);
 }
@@ -2114,7 +2114,7 @@ int VoltDBEngine::antiCacheReadBlocks(int32_t tableId, int numBlocks, int32_t bl
     VOLT_INFO("Preparing to read %d evicted blocks: [%s]", numBlocks, buffer.str().c_str());
     #endif
     VOLT_DEBUG("Preparing to read %d evicted blocks asynchronously: [%s]", numBlocks, (table->name()).c_str());
-    
+
     // We can now ask it directly to read in the evicted blocks that they want
     bool finalResult = true;
     AntiCacheEvictionManager* eviction_manager = m_executorContext->getAntiCacheEvictionManager();
@@ -2144,7 +2144,7 @@ int VoltDBEngine::antiCacheReadBlocks(int32_t tableId, int numBlocks, int32_t bl
                    numBlocks, table->name().c_str(), e.message().c_str());
         // FIXME: This won't work if we execute are executing this operation the
         //        same time that txns are running
-        
+
         // MJG DANGER!!!!
         resetReusedResultOutputBuffer();
         e.serialize(getExceptionOutputSerializer());

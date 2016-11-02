@@ -513,7 +513,7 @@ public class HStoreSite implements VoltProcedureListener.Handler, Shutdownable, 
             this.m_ariesLog = new AriesLogNative(numSites, numPartitionsPerSite, this.m_ariesLogFileName);
             this.m_recoveryLog = new VoltLogger("RECOVERY");
         }
-                        
+        
         // **IMPORTANT**
         // Always clear out the CatalogUtil and BatchPlanner before we start our new HStoreSite
         // TODO: Move this cache information into CatalogContext

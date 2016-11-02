@@ -955,6 +955,6 @@ public abstract class ExecutionEngine implements FastDeserializer.Deserializatio
     protected native long nativeReadAriesLogForReplay(long pointer, long[] size);
 
     protected native void nativeFreePointerToReplayLog(long pointer, long ariesReplayPointer);
-
+    
    
 }

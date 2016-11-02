@@ -107,7 +107,7 @@ PersistentTable::PersistentTable(ExecutorContext *ctx, bool exportEnabled) :
 #ifdef ANTICACHE
     m_evictedTable = NULL;
     m_NVMEvictedTable = NULL;
-    m_unevictedTuples = NULL; 
+    m_unevictedTuples = NULL;
     m_numUnevictedTuples = 0;
     m_newestTupleID = 0;
     m_oldestTupleID = 0;
@@ -193,7 +193,7 @@ PersistentTable::~PersistentTable() {
     if (m_uniqueIndexes) delete[] m_uniqueIndexes;
     if (m_allowNulls) delete[] m_allowNulls;
     if (m_indexes) delete[] m_indexes;
-    
+
     #ifdef ANTICACHE
 //     if (m_evictedTable) delete m_evictedTable;
      if (m_NVMEvictedTable) delete m_NVMEvictedTable;
@@ -210,7 +210,7 @@ PersistentTable::~PersistentTable() {
 
 // ------------------------------------------------------------------
 // ANTI-CACHE
-// ------------------------------------------------------------------ 
+// ------------------------------------------------------------------
 
 #ifdef ANTICACHE
 
@@ -220,7 +220,7 @@ void PersistentTable::setEvictedTable(voltdb::Table *evictedTable) {
 }
 
 voltdb::Table* PersistentTable::getEvictedTable() {
-    return m_evictedTable; 
+    return m_evictedTable;
 }
 
 void PersistentTable::setNVMEvictedTable(voltdb::Table *NVMEvictedTable) {
@@ -229,7 +229,7 @@ void PersistentTable::setNVMEvictedTable(voltdb::Table *NVMEvictedTable) {
 }
 
 voltdb::Table* PersistentTable::getNVMEvictedTable() {
-    return m_NVMEvictedTable; 
+    return m_NVMEvictedTable;
 }
 
 void PersistentTable::setBatchEvicted(bool batchEvicted) {
@@ -243,32 +243,32 @@ bool PersistentTable::isBatchEvicted(){
 
 void PersistentTable::setNumTuplesInEvictionChain(int num_tuples)
 {
-    m_numTuplesInEvictionChain = num_tuples; 
+    m_numTuplesInEvictionChain = num_tuples;
 }
 
 int PersistentTable::getNumTuplesInEvictionChain()
 {
-    return m_numTuplesInEvictionChain;  
+    return m_numTuplesInEvictionChain;
 }
 
 void PersistentTable::setNewestTupleID(uint32_t id)
 {
-    m_newestTupleID = id; 
+    m_newestTupleID = id;
 }
 
 void PersistentTable::setOldestTupleID(uint32_t id)
 {
-    m_oldestTupleID = id; 
+    m_oldestTupleID = id;
 }
 
 uint32_t PersistentTable::getNewestTupleID()
 {
-    return m_newestTupleID; 
+    return m_newestTupleID;
 }
 
 uint32_t PersistentTable::getOldestTupleID()
 {
-    return m_oldestTupleID; 
+    return m_oldestTupleID;
 }
 
 AntiCacheDB* PersistentTable::getAntiCacheDB(int level)
@@ -461,7 +461,7 @@ int64_t PersistentTable::unevictTuple(ReferenceSerializeInput * in, int j, int m
     m_tupleCount++;
 
     int64_t bytesUnevicted = 0;
-    
+
     // This only works if we either merge a single tuple or an entire block. If,
     // in the future, we would like to merge more than one tuple but less than
     // an entire block, this will need to be changed because it destroys the buffer
@@ -620,7 +620,7 @@ bool PersistentTable::insertTuple(TableTuple &source) {
 
 #ifdef ANTICACHE
     AntiCacheEvictionManager* eviction_manager = m_executorContext->getAntiCacheEvictionManager();
-    eviction_manager->updateTuple(this, &m_tmpTarget1, true); 
+    eviction_manager->updateTuple(this, &m_tmpTarget1, true);
 #endif
 
     return true;
@@ -632,7 +632,7 @@ bool PersistentTable::insertTuple(TableTuple &source) {
  */
 void PersistentTable::insertTupleForUndo(TableTuple &source, size_t wrapperOffset) {
 
-    //VOLT_INFO("In insertTupleForUndo()."); 
+    //VOLT_INFO("In insertTupleForUndo().");
 
     // not null checks at first
     if (!checkNulls(source)) {
@@ -859,7 +859,7 @@ bool PersistentTable::deleteTuple(TableTuple &target, bool deleteAllocatedString
 #ifdef ANTICACHE
 #ifndef ANTICACHE_TIMESTAMPS
     AntiCacheEvictionManager* eviction_manager = m_executorContext->getAntiCacheEvictionManager();
-    eviction_manager->removeTuple(this, &target); 
+    eviction_manager->removeTuple(this, &target);
 #endif
 #endif
 
@@ -1002,7 +1002,7 @@ void PersistentTable::deleteFromAllIndexes(TableTuple *tuple) {
 void PersistentTable::updateFromAllIndexes(TableTuple &targetTuple, const TableTuple &sourceTuple) {
     for (int i = m_indexCount - 1; i >= 0;--i) {
         if (!m_indexes[i]->replaceEntry(&targetTuple, &sourceTuple)) {
-            VOLT_ERROR("Failed to update indexes"); 
+            VOLT_ERROR("Failed to update indexes");
             throwFatalException("Failed to update tuple in index");
         }
     }
@@ -1147,11 +1147,11 @@ void PersistentTable::onSetColumns() {
  */
 void PersistentTable::processLoadedTuple(bool allowExport, TableTuple &tuple) {
 
-    //VOLT_INFO("in processLoadedTuple()."); 
+    //VOLT_INFO("in processLoadedTuple().");
 
 #ifdef ANTICACHE
     AntiCacheEvictionManager* eviction_manager = m_executorContext->getAntiCacheEvictionManager();
-    eviction_manager->updateTuple(this, &m_tmpTarget1, true); 
+    eviction_manager->updateTuple(this, &m_tmpTarget1, true);
 #endif
 
     // handle any materialized views
@@ -1176,7 +1176,7 @@ void PersistentTable::processLoadedTuple(bool allowExport, TableTuple &tuple) {
  * Implemented by persistent table and called by Table::loadTuplesFrom
  * to do add tuples to indexes
  */
-void PersistentTable::populateIndexes(int tupleCount) 
+void PersistentTable::populateIndexes(int tupleCount)
 {
     // populate indexes. walk the contiguous memory in the inner loop.
     for (int i = m_indexCount - 1; i >= 0;--i) {

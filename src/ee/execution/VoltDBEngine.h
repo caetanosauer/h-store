@@ -141,7 +141,7 @@ class __attribute__((visibility("default"))) VoltDBEngine {
         }
 
         VoltDBEngine(Topend *topend, LogProxy *logProxy);
-    
+
         bool initialize(
                 int32_t clusterIndex,
                 int32_t siteId,
@@ -291,7 +291,7 @@ class __attribute__((visibility("default"))) VoltDBEngine {
 //         std::vector<std::string> trackingTablesRead(int64_t txnId);
 //         std::vector<std::string> trackingTablesWritten(int64_t txnId);
         int trackingTupleSet(int64_t txnId, bool writes);
-        
+
         // -------------------------------------------------
         // ANTI-CACHE FUNCTIONS
         // -------------------------------------------------
@@ -504,7 +504,7 @@ class __attribute__((visibility("default"))) VoltDBEngine {
         bool updateCatalogDatabaseReference();
 
         void printReport();
-        
+
         // HACK: PAVLO 2014-11-20
         // This is needed so that we can fix index stats collection
         inline CatalogId computeIndexStatsId(const CatalogId tableId, const CatalogId indexId) const {
@@ -687,11 +687,11 @@ void VoltDBEngine::releaseUndoToken(int64_t undoToken){
   }
 
 #ifdef STORAGE_MMAP
-  if(m_executorContext->isMMAPEnabled()){    
+  if(m_executorContext->isMMAPEnabled()){
       for (std::map<int32_t, Table*>::iterator m_tables_itr = m_tables.begin() ; m_tables_itr != m_tables.end() ; ++m_tables_itr){
           Table* table = m_tables_itr->second;
 
-          // Fix Group Commit Interval       
+          // Fix Group Commit Interval
           int64_t m_groupCommitInterval = m_executorContext->getMMAPSyncFrequency() ;
           VOLT_WARN("Sync Frequency: %ld", m_groupCommitInterval);
 
@@ -699,7 +699,7 @@ void VoltDBEngine::releaseUndoToken(int64_t undoToken){
               VOLT_WARN("Undo Token: %ld", m_currentUndoQuantum->getUndoToken());
 
               if(table != NULL){
-                  //VOLT_WARN("Syncing Table %s",table->name().c_str());      
+                  //VOLT_WARN("Syncing Table %s",table->name().c_str());
                   /*Pool* pool = table->getPool();
                   if(pool != NULL)
                       MMAPMemoryManager* m_pool_manager = pool->getPoolManager();
@@ -716,7 +716,7 @@ void VoltDBEngine::releaseUndoToken(int64_t undoToken){
 #endif
 
   if (m_currentUndoQuantum != NULL && m_currentUndoQuantum->getUndoToken() == undoToken) {
-      m_currentUndoQuantum = NULL;    
+      m_currentUndoQuantum = NULL;
   }
 
   VOLT_TRACE("Committing Buffer Token %ld at partition %d", undoToken, m_partitionId);

@@ -870,7 +870,7 @@ public class PartitionExecutor implements Runnable, Configurable, Shutdownable {
                     File dbFile = getARIESDir(this);
                     File logFile = getARIESFile(this);
                     eeTemp.ARIESInitialize(dbFile, logFile);
-                }                            
+                }       
                 
                 // Important: This has to be called *after* we initialize the anti-cache
                 //            and the storage information!

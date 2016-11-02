@@ -945,5 +945,5 @@ public class ExecutionEngineJNI extends ExecutionEngine {
     public long readAriesLogForReplay(long[] size) {
         return nativeReadAriesLogForReplay(pointer, size);
     }
-
+    
 }
