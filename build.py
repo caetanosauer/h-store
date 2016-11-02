@@ -113,6 +113,7 @@ if CTX.FINELINE:
             'src/ee/fineline/foster-btree/src', 
             'src/ee/fineline/foster-btree/third-party/spdlog/include'
     ]
+    CTX.LDFLAGS += " -lsqlite3 -lboost_regex -lboost_system -lboost_filesystem -lboost_program_options "
 
 CTX.SYSTEM_DIRS = [
     'third_party/cpp',
@@ -461,21 +462,6 @@ if CTX.ANTICACHE_BUILD:
         anticache_eviction_manager_test
     """
 
-###############################################################################
-# BUILD THE MAKEFILE
-###############################################################################
-
-#print("TARGET PLATFORM: ", CTX.PLATFORM, "-", CTX.PLATFORM_VERSION)
-#print("CPPFLAGS: ", CTX.CPPFLAGS)
-#print(sys.stdout.flush())
-
-# this function (in buildtools.py) generates the makefile
-# it's currently a bit ugly but it'll get cleaned up soon
-buildMakefile(CTX)
-
-###############################################################################
-# RUN THE MAKEFILE
-###############################################################################
 numHardwareThreads = 4
 
 if CTX.PLATFORM == "Darwin":
@@ -497,17 +483,6 @@ else:
     print("WARNING: Unsupported platform type '%s'" % CTX.PLATFORM)
 print("Detected %d hardware threads to use during the build" % (numHardwareThreads))
 
-print()
-retval = os.system("make --directory=%s -j%d nativelibs/libvoltdb.sym" % (CTX.OUTPUT_PREFIX, numHardwareThreads))
-print("Make returned: ", retval)
-if retval != 0:
-    sys.exit(-1)
-
-print()
-retval = os.system("make --directory=%s -j%d nativelibs/libvoltdb.sym" % (CTX.OUTPUT_PREFIX, numHardwareThreads))
-print("Make returned: ", retval)
-if retval != 0:
-    sys.exit(-1)
 
 ###############################################################################
 # FINELINE
@@ -526,6 +501,11 @@ if CTX.FINELINE:
     if not os.path.exists(flPath):
         os.mkdir(flPath)
 
+    CTX.THIRD_PARTY_STATIC_LIBS.extend([
+        "../../src/ee/fineline/build/src/libfineline.a",
+        "../../src/ee/fineline/build/src/legacy/liblegacy.a",
+        ])
+
     with pushd(flPath):
         cmakeArgs = ""
         if CTX.LEVEL == "DEBUG":
@@ -540,6 +520,33 @@ if CTX.FINELINE:
         print("Make returned: ", retval)
         if retval != 0:
             sys.exit(-1)
+
+###############################################################################
+# BUILD THE MAKEFILE
+###############################################################################
+
+#print("TARGET PLATFORM: ", CTX.PLATFORM, "-", CTX.PLATFORM_VERSION)
+#print("CPPFLAGS: ", CTX.CPPFLAGS)
+#print(sys.stdout.flush())
+
+# this function (in buildtools.py) generates the makefile
+# it's currently a bit ugly but it'll get cleaned up soon
+buildMakefile(CTX)
+
+###############################################################################
+# RUN THE MAKEFILE
+###############################################################################
+print()
+retval = os.system("make --directory=%s -j%d nativelibs/libvoltdb.sym" % (CTX.OUTPUT_PREFIX, numHardwareThreads))
+print("Make returned: ", retval)
+if retval != 0:
+    sys.exit(-1)
+
+print()
+retval = os.system("make --directory=%s -j%d nativelibs/libvoltdb.sym" % (CTX.OUTPUT_PREFIX, numHardwareThreads))
+print("Make returned: ", retval)
+if retval != 0:
+    sys.exit(-1)
 
 ###############################################################################
 # RUN THE TESTS IF ASKED TO
