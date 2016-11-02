@@ -1770,4 +1770,30 @@ engine->freePointerToReplayLog(replayLogData);
 }
 #endif
 
+#ifdef FINELINE
+SHAREDLIB_JNIEXPORT jint JNICALL Java_org_voltdb_jni_ExecutionEngine_nativeFinelineInit (
+        JNIEnv *env,
+        jobject obj,
+        jlong engine_ptr,
+        jstring args)
+{
+    VOLT_DEBUG("nativeFinelineInit() start");
+    VoltDBEngine *engine = castToEngine(engine_ptr);
+    Topend *topend = static_cast<JNITopend*>(engine->getTopend())->updateJNIEnv(env);
+    if (engine == NULL) {
+        return org_voltdb_jni_ExecutionEngine_ERRORCODE_ERROR;
+    }
+    try {
+        // FineLine code begin
+        const char* args_str = env->GetStringUTFChars(args, NULL);
+        engine->finelineInitialize(std::string(args_str));
+        env->ReleaseStringUTFChars(args, args_str);
+        // FineLine code end
+    } catch (FatalException e) {
+        topend->crashVoltDB(e);
+    }
+    return org_voltdb_jni_ExecutionEngine_ERRORCODE_SUCCESS;
+}
+#endif
+
 /** @} */ // end of JNI doxygen group

@@ -946,4 +946,15 @@ public class ExecutionEngineJNI extends ExecutionEngine {
         return nativeReadAriesLogForReplay(pointer, size);
     }
     
+    /*
+     * FineLine
+     */
+    @Override
+    public void finelineInit(String args) {
+    	LOG.warn("Initializing FineLine at partition " + this.executor.getPartitionId() + " with options: ");
+    	LOG.warn(args);
+    	final int errorCode = nativeFinelineInit(pointer, args);
+    	checkErrorCode(errorCode);
+    }
+
 }

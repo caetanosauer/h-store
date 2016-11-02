@@ -71,9 +71,8 @@
 #include "storage/RecoveryContext.h"
 
 #ifdef FINELINE
-#include "fineline/src/fineline.h"
+#include "fineline.h"
 #endif
-
 
 namespace voltdb {
 
@@ -436,6 +435,12 @@ protected:
 
     //Recovery stuff
     boost::scoped_ptr<RecoveryContext> m_recoveryContext;
+
+#ifdef FINELINE
+    fineline::DftLogger m_finelineLogger;
+
+    using LRType = foster::LRType;
+#endif
 };
 
 inline TableTuple& PersistentTable::getTempTupleInlined(TableTuple &source) {

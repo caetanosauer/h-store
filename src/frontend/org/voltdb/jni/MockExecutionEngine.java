@@ -269,5 +269,10 @@ public class MockExecutionEngine extends ExecutionEngine {
         return 0;
     }
     
+    @Override
+    public void finelineInit(String args) {
+    	throw new NotImplementedException("FineLine not supported in MockExecutionEngine");
+    }
+    
 
 }

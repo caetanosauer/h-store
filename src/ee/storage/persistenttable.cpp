@@ -623,6 +623,12 @@ bool PersistentTable::insertTuple(TableTuple &source) {
     eviction_manager->updateTuple(this, &m_tmpTarget1, true);
 #endif
 
+#ifdef FINELINE
+    // CS: Just testing for now: create and commit a single txn with some dummy logrec
+    fineline::DftTxnContext ctx {true};
+    m_finelineLogger.log(LRType::Insert, 4711, "test");
+#endif
+
     return true;
 }
 

@@ -1547,4 +1547,10 @@ public class ExecutionEngineIPC extends ExecutionEngine {
         throw new NotImplementedException("ARIES recovery is disabled for IPC ExecutionEngine");
     }
     
+    // FineLine
+    @Override
+    public void finelineInit(String args) {
+    	throw new NotImplementedException("FineLine logging and recovery is disabled for IPC ExecutionEngine");
+    }
+
 }

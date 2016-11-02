@@ -872,6 +872,12 @@ public class PartitionExecutor implements Runnable, Configurable, Shutdownable {
                     eeTemp.ARIESInitialize(dbFile, logFile);
                 }       
                 
+                LOG.warn("Value of fineline is " + hstore_conf.site.fineline);
+                // Initialize FINELINE
+                if (hstore_conf.site.fineline) {
+                    eeTemp.finelineInit(hstore_conf.site.fineline_options);
+                }
+
                 // Important: This has to be called *after* we initialize the anti-cache
                 //            and the storage information!
                 eeTemp.loadCatalog(catalogContext.catalog.serialize());

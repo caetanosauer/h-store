@@ -111,6 +111,11 @@
 #include <map>
 #include <set>
 
+#ifdef FINELINE
+#include "fineline.h"
+#include <wordexp.h> // for building argc,argv from single string
+#endif
+
 #define BUFFER_SIZE         1024*1024*300    // 100 MB buffer for reading in log file
 
 using namespace std;
@@ -2276,6 +2281,34 @@ void VoltDBEngine::MMAPInitialize(std::string dbDir, long mapSize, long syncFreq
 #else
 void VoltDBEngine::MMAPInitialize(std::string dbDir, long blockSize,
         long syncFrequency) const {
+    VOLT_ERROR("Storage MMAP feature was not enabled when compiling the EE");
+}
+#endif
+
+// -------------------------------------------------
+// FINELINE FUNCTIONS
+// -------------------------------------------------
+
+#ifdef FINELINE
+void VoltDBEngine::finelineInitialize(std::string args)
+{
+    // first argv should be the program name, which we prepend here
+    args.insert(0, "fineline ");
+    wordexp_t wexp;
+    int rc = wordexp(args.c_str(), &wexp, 0 /*flags*/);
+    if (rc != 0) {
+        VOLT_ERROR("Error expanding FineLine arguments");
+    }
+
+    int argc = wexp.we_wordc;
+    char** argv = wexp.we_wordv;
+    fineline::init(argc, argv);
+
+    wordfree(&wexp);
+}
+#else
+void VoltDBEngine::finelineInitialize(std::string)
+{
     VOLT_ERROR("Storage MMAP feature was not enabled when compiling the EE");
 }
 #endif

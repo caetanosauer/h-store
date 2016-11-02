@@ -340,6 +340,13 @@ class __attribute__((visibility("default"))) VoltDBEngine {
             m_ARIESEnabled = status;
         }
 
+        // FINELINE
+        void finelineInitialize(std::string args);
+
+        // bool isFinelineEnabled() {
+        //     return m_FinelineEnabled;
+        // }
+
 
         // -------------------------------------------------
         // Debug functions
@@ -722,7 +729,6 @@ void VoltDBEngine::releaseUndoToken(int64_t undoToken){
   VOLT_TRACE("Committing Buffer Token %ld at partition %d", undoToken, m_partitionId);
   m_undoLog.release(undoToken);
 }
-
 
 } // namespace voltdb
 

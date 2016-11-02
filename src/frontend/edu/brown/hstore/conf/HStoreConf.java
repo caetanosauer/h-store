@@ -890,6 +890,23 @@ public final class HStoreConf {
         public boolean aries_reset;
         
         // ----------------------------------------------------------------------------
+        //  FineLine
+        // ----------------------------------------------------------------------------
+        @ConfigProperty(
+                description="FineLine logging and recovery enabled. ",
+                defaultBoolean=false,
+                experimental=true
+        )
+        public boolean fineline;
+
+        @ConfigProperty(
+                description="Option string to be passed to fineline initialization in C++ engine ",
+                defaultString="",
+                experimental=true
+        )
+        public String fineline_options;
+
+        // ----------------------------------------------------------------------------
         //  Logical Recovery Options
         // ----------------------------------------------------------------------------
         @ConfigProperty(

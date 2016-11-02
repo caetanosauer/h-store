@@ -956,5 +956,11 @@ public abstract class ExecutionEngine implements FastDeserializer.Deserializatio
 
     protected native void nativeFreePointerToReplayLog(long pointer, long ariesReplayPointer);
     
+    // ----------------------------------------------------------------------------
+    // FineLine
+    // ----------------------------------------------------------------------------
+    public abstract void finelineInit(String args);
+
+    protected native int nativeFinelineInit(long pointer, String args);
    
 }
