@@ -71,8 +71,6 @@ public abstract class HStore {
     private static HStoreSite singleton;
     private static String buildString;
     private static String versionString;
-    private static boolean m_ariesRecovery;
-    
     
     /**
      * Retrieve a reference to the main HStoreSite running in this JVM. 
@@ -316,6 +314,7 @@ public abstract class HStore {
                     sb.append((char)b);
                 }
                 versionString = sb.toString().trim();
+                buildstringStream.close();
             }
             catch (Exception ignored2) {
                 throw new RuntimeException(ignored);

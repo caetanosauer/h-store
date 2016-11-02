@@ -44,7 +44,6 @@ import org.voltdb.utils.DBBPool.BBContainer;
 
 import edu.brown.hstore.HStoreConstants;
 import edu.brown.hstore.PartitionExecutor;
-import edu.brown.hstore.conf.HStoreConf;
 import edu.brown.logging.LoggerUtil;
 import edu.brown.logging.LoggerUtil.LoggerBoolean;
 
