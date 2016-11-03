@@ -175,6 +175,8 @@
 <arg value="site.aries_forward_only=${site.aries_forward_only}" />
 <arg value="site.aries_dir=${site.aries_dir}" />
 <arg value="site.aries_reset=${site.aries_reset}" />
+<arg value="site.fineline=${site.fineline}" />
+<arg value="site.fineline_options=${site.fineline_options}" />
 <arg value="site.snapshot=${site.snapshot}" />
 <arg value="site.snapshot_dir=${site.snapshot_dir}" />
 <arg value="site.snapshot_reset=${site.snapshot_reset}" />
