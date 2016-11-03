@@ -11,6 +11,13 @@ LOG_LEVEL_NAMES = {
     "DISABLE":  1000,
 }
 
+# CS: nasty bug when calling bool(parts[1]) below, because
+# bool("false") == True
+def strtobool(s):
+    if s.lower() in ("no", "false", "0"): return False
+    if s.lower() in ("yes", "true", "1"): return True
+    raise ValueError
+
 class BuildContext:
     def __init__(self, args):
         self.CPPFLAGS = ""
@@ -59,47 +66,52 @@ class BuildContext:
                 self.COVERAGE = True
             if arg.startswith("STORAGE_MMAP="):
                 parts = arg.split("=")
-                if len(parts) > 1 and not (parts[1].startswith("${")): self.STORAGE_MMAP = bool(parts[1])
+                if len(parts) > 1 and not (parts[1].startswith("${")):
+                    self.STORAGE_MMAP = strtobool(parts[1])
             if arg.startswith("STORAGE_MMAP_FILE_SIZE="):
                 parts = arg.split("=")
-                if len(parts) > 1 and not (parts[1].startswith("${")): self.STORAGE_MMAP_FILE_SIZE = long(parts[1])
+                if len(parts) > 1 and not (parts[1].startswith("${")):
+                    self.STORAGE_MMAP_FILE_SIZE = long(parts[1])
             if arg.startswith("STORAGE_MMAP_SYNC_FREQUENCY="):
                 parts = arg.split("=")
-                if len(parts) > 1 and not (parts[1].startswith("${")): self.STORAGE_MMAP_SYNC_FREQUENCY = long(parts[1])
+                if len(parts) > 1 and not (parts[1].startswith("${")):
+                    self.STORAGE_MMAP_SYNC_FREQUENCY = long(parts[1])
             if arg.startswith("ARIES="):
                 parts = arg.split("=")
-                if len(parts) > 1 and not (parts[1].startswith("${")): self.ARIES = bool(parts[1])
+                if len(parts) > 1 and not (parts[1].startswith("${")):
+                    self.ARIES = strtobool(parts[1])
             if arg.startswith("ANTICACHE_ENABLE="):
                 parts = arg.split("=")
-                if len(parts) > 1 and not (parts[1].startswith("${")): self.ANTICACHE_ENABLE = bool(parts[1])
+                if len(parts) > 1 and not (parts[1].startswith("${")):
+                    self.ANTICACHE_ENABLE = strtobool(parts[1])
             if arg.startswith("ANTICACHE_REVERSIBLE_LRU="):
                 parts = arg.split("=")
                 if len(parts) > 1 and not parts[1].startswith("${"): 
-                    self.MMAP_STORAGE = bool(parts[1])
+                    self.MMAP_STORAGE = strtobool(parts[1])
             if arg.startswith("ANTICACHE_BUILD="):
                 parts = arg.split("=")
                 if len(parts) > 1 and not parts[1].startswith("${"):
-                    self.ANTICACHE_BUILD = bool(parts[1])
+                    self.ANTICACHE_BUILD = strtobool(parts[1])
             if arg.startswith("ANTICACHE_REVERSIBLE_LRU="):
                 parts = arg.split("=")
                 if len(parts) > 1 and not parts[1].startswith("${"):
-                    self.ANTICACHE_REVERSIBLE_LRU = bool(parts[1])
+                    self.ANTICACHE_REVERSIBLE_LRU = strtobool(parts[1])
             if arg.startswith("ANTICACHE_NVM="):
                 parts = arg.split("=")
                 if len(parts) > 1 and not parts[1].startswith("${"):
-                    self.ANTICACHE_NVM = bool(parts[1])
+                    self.ANTICACHE_NVM = strtobool(parts[1])
             if arg.startswith("ANTICACHE_COUNTER="):
                 parts = arg.split("=")
                 if len(parts) > 1 and not parts[1].startswith("${"):
-                    self.ANTICACHE_COUNTER = bool(parts[1])
+                    self.ANTICACHE_COUNTER = strtobool(parts[1])
             if arg.startswith("ANTICACHE_TIMESTAMPS="):
                 parts = arg.split("=")
                 if len(parts) > 1 and not parts[1].startswith("${"):
-                    self.ANTICACHE_TIMESTAMPS = bool(parts[1])
+                    self.ANTICACHE_TIMESTAMPS = strtobool(parts[1])
             if arg.startswith("ANTICACHE_TIMESTAMPS_PRIME="):
                 parts = arg.split("=")
                 if len(parts) > 1 and not parts[1].startswith("${"):
-                    self.ANTICACHE_TIMESTAMPS_PRIME = bool(parts[1])
+                    self.ANTICACHE_TIMESTAMPS_PRIME = strtobool(parts[1])
                 
             if arg.startswith("LOG_LEVEL="):
                 parts = arg.split("=")
