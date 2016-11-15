@@ -34,14 +34,14 @@
 #endif
 
 namespace voltdb {
-    
+
     class ReadWriteTrackerManager;
-    
+
     #ifdef ANTICACHE
     class AntiCacheDB;
-    class AntiCacheEvictionManager; 
+    class AntiCacheEvictionManager;
     #endif
-    
+
     /*
      * EE site global data required by executors at runtime.
      *
@@ -197,11 +197,11 @@ namespace voltdb {
         // ------------------------------------------------------------------
 
         #ifdef ANTICACHE
-        
+
         inline bool isAntiCacheEnabled() const {
             return (m_antiCacheEnabled);
         }
-        
+
         /**
          * Return the handle to disk-based storage object that we
          * can use to read and write tuples to
@@ -232,7 +232,7 @@ namespace voltdb {
         AntiCacheEvictionManager* getAntiCacheEvictionManager() const {
             return m_antiCacheEvictionManager;
         }
-        
+
         /**
          * Return the AntiCacheDBType associated with the given AntiCacheDB
          */
@@ -277,7 +277,7 @@ namespace voltdb {
         void addAntiCacheDB(std::string &dbDir, long blockSize, AntiCacheDBType dbType, bool blocking, long maxSize, bool blockMerge) {
             assert(m_antiCacheEnabled == true);
             m_dbType[m_levels] = dbType;
-            // MJG: need a better error return (throw exception?) 
+            // MJG: need a better error return (throw exception?)
             if (dbType == ANTICACHEDB_BERKELEY) {
                 m_antiCacheDB[m_levels] = new BerkeleyAntiCacheDB(this, dbDir, blockSize, maxSize);
 //              m_antiCacheEvictionManager->addAntiCacheDB(new BerkeleyAntiCacheDB(this, dbDir, blockSize, maxSize));
@@ -290,7 +290,7 @@ namespace voltdb {
             } else {
                 VOLT_ERROR("Invalid AntiCacheDBType: %d! Aborting...", (int)dbType);
                 assert(m_antiCacheEnabled == false);
-            }  
+            }
             m_antiCacheDB[m_levels]->setBlocking(blocking);
             m_antiCacheDB[m_levels]->setBlockMerge(blockMerge);
             m_blockMerge[m_levels] = blockMerge;

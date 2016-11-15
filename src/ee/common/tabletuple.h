@@ -59,26 +59,26 @@ class CopyOnWriteTest_TestTableTupleFlags;
 class TableTupleTest_MarkAsEvicted;
 
 namespace voltdb {
-    
+
 /*
- 
+
  The tuple header is of the following structures:
- 
+
  (a). No anti-caching
  -----------------------------------
  |  flags (1 byte)  |  tuple data  |
  -----------------------------------
- 
+
  (b). Anti-Caching with single-linked list
  ---------------------------------------------------------------
  |  flags (1 byte)  |  "next" tuple id (4 bytes) | tuple data  |
  ---------------------------------------------------------------
- 
+
  (c). Anti-Caching with double-linked list
  ---------------------------------------------------------------------------------------------------
  |  flags (1 byte)  |  "previous" tuple id  (4 bytes)  |  "next" tuple id (4 bytes)  | tuple data  |
  ---------------------------------------------------------------------------------------------------
- 
+
  (d). Anti-Caching with timestamps
  ----------------------------------------------------------
  |  flags (1 byte)  |  time stamp (4 bytes) | tuple data  |
@@ -301,27 +301,27 @@ public:
     inline ValueType getType(int idx) const {
         return m_schema->columnType(idx);
     }
-    
+
 #ifdef ANTICACHE
 	#ifndef ANTICACHE_TIMESTAMPS
     	inline uint32_t getNextTupleInChain() {
         	uint32_t tuple_id = 0;
 	        memcpy(&tuple_id, m_data+TUPLE_HEADER_SIZE-4, 4);
-   	     
-    	    return tuple_id; 
+
+    	    return tuple_id;
     	}
-    
+
 	    inline void setNextTupleInChain(uint32_t next) {
     	    memcpy(m_data+TUPLE_HEADER_SIZE-4, &next, 4);
 
     	}
-    
+
     	inline uint32_t getPreviousTupleInChain() {
         	uint32_t tuple_id = 0;
         	memcpy(&tuple_id, m_data+TUPLE_HEADER_SIZE-8, 4);
         	return tuple_id;
     	}
-    
+
     	inline void setPreviousTupleInChain(uint32_t prev) {
         	memcpy(m_data+TUPLE_HEADER_SIZE-8, &prev, 4);
     	}
@@ -330,8 +330,8 @@ public:
     	inline uint32_t getTimeStamp() {
         	uint32_t time_stamp = 0;
 	        memcpy(&time_stamp, m_data+TUPLE_HEADER_SIZE-4, 4);
-   	     
-    	    return time_stamp; 
+
+    	    return time_stamp;
     	}
 
         static uint64_t rdtsc() {
@@ -339,7 +339,7 @@ public:
             __asm__ __volatile__ ("rdtsc": "=a" (lo), "=d" (hi));
             return (((uint64_t)hi << 32) | lo);
         }
-    
+
         inline void setTimeStamp() {
             uint32_t current_time = (uint32_t)(rdtsc() >> 32);
             memcpy(m_data+TUPLE_HEADER_SIZE-4, &current_time, 4);
@@ -354,15 +354,15 @@ public:
 
         inline uint32_t getTupleID()
         {
-            uint32_t tuple_id; 
-            memcpy(&tuple_id, m_data+TUPLE_HEADER_SIZE-4, 4);  
+            uint32_t tuple_id;
+            memcpy(&tuple_id, m_data+TUPLE_HEADER_SIZE-4, 4);
 
-            return tuple_id; 
+            return tuple_id;
         }
 
         inline void setTupleID(uint32_t tuple_id)
         {
-            memcpy(m_data+TUPLE_HEADER_SIZE-4, &tuple_id, 4); 
+            memcpy(m_data+TUPLE_HEADER_SIZE-4, &tuple_id, 4);
         }
 
         /** Get the value of a specified column (const) */
@@ -719,10 +719,10 @@ inline int64_t TableTuple::deserializeWithHeaderFrom(voltdb::SerializeInput &tup
     assert(m_schema);
     assert(m_data);
 
-    tupleIn.readInt();  // read in the tuple size, discard 
+    tupleIn.readInt();  // read in the tuple size, discard
     total_bytes_deserialized+=sizeof(int);
 
-    memcpy(m_data, tupleIn.getRawPointer(TUPLE_HEADER_SIZE), TUPLE_HEADER_SIZE);    
+    memcpy(m_data, tupleIn.getRawPointer(TUPLE_HEADER_SIZE), TUPLE_HEADER_SIZE);
     total_bytes_deserialized += TUPLE_HEADER_SIZE;
 
     for (int j = 0; j < m_schema->columnCount(); ++j) {
@@ -747,42 +747,42 @@ inline int64_t TableTuple::deserializeWithHeaderFrom(voltdb::SerializeInput &tup
     return total_bytes_deserialized;
     //    for (int j = 0; j < m_schema->columnCount(); ++j) {
     //        ValueType type = m_schema->columnType(j);
-    //        
+    //
     //        switch (type) {
     //            case VALUE_TYPE_BIGINT:
     //            case VALUE_TYPE_TIMESTAMP:
-    //                
+    //
     //                *reinterpret_cast<int64_t*>(m_data+total_bytes_deserialized) = tupleIn.readLong();
     //                total_bytes_deserialized += 8;
     //                break;
-    //                
+    //
     //            case VALUE_TYPE_TINYINT:
-    //                
+    //
     //                *reinterpret_cast<int8_t*>(m_data+total_bytes_deserialized) = tupleIn.readByte();
     //                total_bytes_deserialized += 1;
     //                break;
-    //                
+    //
     //            case VALUE_TYPE_SMALLINT:
-    //                
+    //
     //                *reinterpret_cast<int16_t*>(m_data+total_bytes_deserialized) = tupleIn.readShort();
     //                total_bytes_deserialized += 2;
     //                break;
-    //                
+    //
     //            case VALUE_TYPE_INTEGER:
-    //                
+    //
     //                *reinterpret_cast<int32_t*>(m_data+total_bytes_deserialized) = tupleIn.readInt();
     //                total_bytes_deserialized += 4;
     //                break;
-    //                
+    //
     //            case VALUE_TYPE_DOUBLE:
-    //                
+    //
     //                *reinterpret_cast<double* >(m_data+total_bytes_deserialized) = tupleIn.readDouble();
     //                total_bytes_deserialized += sizeof(double);
     //                break;
-    //                
+    //
     //            case VALUE_TYPE_VARCHAR: {
     //                int32_t length = tupleIn.readInt();  // read in the length of this serialized string
-    //                
+    //
     //                memcpy(m_data+total_bytes_deserialized, &length, 4);
     //                total_bytes_deserialized += 4;
     //
@@ -790,7 +790,7 @@ inline int64_t TableTuple::deserializeWithHeaderFrom(voltdb::SerializeInput &tup
     //                {
     //                    VOLT_INFO("Dserializing an non in-line string of length %d.", length);
     //                }
-    //                
+    //
     //                memcpy(m_data+total_bytes_deserialized, tupleIn.getRawPointer(length), length);
     //                total_bytes_deserialized += length;
     //
@@ -798,7 +798,7 @@ inline int64_t TableTuple::deserializeWithHeaderFrom(voltdb::SerializeInput &tup
     //            }
     //            case VALUE_TYPE_DECIMAL: {
     //                int64_t *longStorage = reinterpret_cast<int64_t*>(m_data+total_bytes_deserialized);
-    //                
+    //
     //                total_bytes_deserialized += 8;
     //
     //                //Reverse order for Java BigDecimal BigEndian
@@ -819,9 +819,9 @@ inline int64_t TableTuple::deserializeWithHeaderFrom(voltdb::SerializeInput &tup
 inline void TableTuple::serializeWithHeaderTo(voltdb::SerializeOutput &output) {
 
     assert(m_schema);
-    assert(m_data); 
+    assert(m_data);
 
-    size_t start = output.position(); 
+    size_t start = output.position();
     output.writeInt(0);  // reserve first 4 bytes for the total tuple size
 
     output.writeBytes(m_data, TUPLE_HEADER_SIZE);

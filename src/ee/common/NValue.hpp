@@ -2073,8 +2073,8 @@ inline int64_t NValue::deserializeFrom(SerializeInput &input, const ValueType ty
       case VALUE_TYPE_DOUBLE:
         *reinterpret_cast<double* >(storage) = input.readDouble();
         return sizeof(double);
-      case VALUE_TYPE_VARCHAR: 
-      case VALUE_TYPE_VARBINARY: 
+      case VALUE_TYPE_VARCHAR:
+      case VALUE_TYPE_VARBINARY:
 	{
     	  int64_t bytesRead = 0;
           const int32_t length = input.readInt();
