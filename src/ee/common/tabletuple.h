@@ -405,7 +405,7 @@ public:
         int compare(const TableTuple &other) const;
 
         void deserializeFrom(voltdb::SerializeInput &tupleIn, Pool *stringPool);
-        void serializeTo(voltdb::SerializeOutput &output);
+        void serializeTo(voltdb::SerializeOutput &output) const;
         void serializeToExport(voltdb::ExportSerializeOutput &io,
                 int colOffset, uint8_t *nullArray);
 
@@ -839,7 +839,7 @@ inline void TableTuple::serializeWithHeaderTo(voltdb::SerializeOutput &output) {
 }
 
 
-inline void TableTuple::serializeTo(voltdb::SerializeOutput &output) {
+inline void TableTuple::serializeTo(voltdb::SerializeOutput &output) const {
     size_t start = output.reserveBytes(4);
 
     for (int j = 0; j < m_schema->columnCount(); ++j) {

@@ -178,6 +178,9 @@ class NValue {
     static const NValue deserializeFromAllocateForStorage(
         SerializeInput &input, Pool *dataPool);
 
+    /* Get length of serialized output */
+    size_t getSerializedLength() const;
+
     /* Serialize this NValue to a SerializeOutput */
     void serializeTo(SerializeOutput &output) const;
 
@@ -2187,6 +2190,59 @@ inline const NValue NValue::deserializeFromAllocateForStorage(SerializeInput &in
           throwFatalException("NValue::deserializeFromAllocateForStorage() unrecognized type '%d'", type);
     }
     return retval;
+}
+
+/*
+ * Return length of serialized value
+ */
+inline size_t NValue::getSerializedLength() const
+{
+    const ValueType type = getValueType();
+    switch (type) {
+      case VALUE_TYPE_VARCHAR:
+      case VALUE_TYPE_VARBINARY:
+      {
+          constexpr size_t LengthSize = sizeof(int32_t);
+
+          if (isNull()) { return LengthSize; }
+          const int32_t length = getObjectLength();
+          if (length < OBJECTLENGTH_NULL) {
+              throwFatalException("Attempted to serialize an NValue with a negative length");
+          }
+          if (length == OBJECTLENGTH_NULL) {
+              assert(getObjectValue() == NULL || length == OBJECTLENGTH_NULL);
+              return LengthSize;
+          }
+
+          return LengthSize + length;
+      }
+      case VALUE_TYPE_TINYINT: {
+          return sizeof(int8_t);
+      }
+      case VALUE_TYPE_SMALLINT: {
+          return sizeof(int16_t);
+      }
+      case VALUE_TYPE_INTEGER: {
+          return sizeof(int32_t);
+      }
+      case VALUE_TYPE_TIMESTAMP: {
+          return sizeof(int64_t);
+      }
+      case VALUE_TYPE_BIGINT: {
+          return sizeof(int64_t);
+      }
+      case VALUE_TYPE_DOUBLE: {
+          return sizeof(double);
+      }
+      case VALUE_TYPE_DECIMAL: {
+          // CS: assuming this is enough for decimal serialization,
+          // which calls writeLong twice
+          return 2*sizeof(int64_t);
+      }
+      default:
+          throwFatalException("NValue::getSerializedLength() found a column "
+                   "with ValueType '%d' that is not handled", type);
+    }
 }
 
 /**
