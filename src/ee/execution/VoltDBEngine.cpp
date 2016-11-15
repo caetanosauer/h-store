@@ -112,7 +112,6 @@
 #include <set>
 
 #ifdef FINELINE
-#include "fineline.h"
 #include <wordexp.h> // for building argc,argv from single string
 #endif
 
@@ -2306,10 +2305,27 @@ void VoltDBEngine::finelineInitialize(std::string args)
 
     wordfree(&wexp);
 }
+
+void VoltDBEngine::finelineBeginTxn()
+{
+    m_executorContext->finelineBeginTxn();
+}
+
+void VoltDBEngine::finelineCommitTxn()
+{
+    m_executorContext->finelineCommitTxn();
+}
+
+void VoltDBEngine::finelineAbortTxn()
+{
+    m_executorContext->finelineAbortTxn();
+}
+
 #else
+
 void VoltDBEngine::finelineInitialize(std::string)
 {
-    VOLT_ERROR("Storage MMAP feature was not enabled when compiling the EE");
+    VOLT_ERROR("FineLine feature was not enabled when compiling the EE");
 }
 #endif
 

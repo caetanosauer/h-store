@@ -388,6 +388,43 @@ namespace voltdb {
         std::string m_ARIESDir;
         #endif
 
+#ifdef FINELINE
+    public:
+        using FinelineTxnCtx = fineline::TxnContext<
+            fineline::DftPlog, fineline::SysEnv>;
+
+        std::unique_ptr<FinelineTxnCtx> m_finelineTxn;
+
+        void finelineBeginTxn()
+        {
+            if (m_finelineTxn) {
+                VOLT_ERROR("Fineline txn context already exists");
+            }
+            constexpr bool auto_commit = false;
+            m_finelineTxn.reset(new FinelineTxnCtx{auto_commit});
+        }
+
+        void finelineCommitTxn()
+        {
+            m_finelineTxn->commit();
+            m_finelineTxn.reset();
+        }
+
+        void finelineAbortTxn()
+        {
+            m_finelineTxn->abort();
+            m_finelineTxn.reset();
+        }
+
+        template <typename Header, typename... T>
+        void finelineLogAction(Header& hdr, const T&... args)
+        {
+            m_finelineTxn->log(hdr, args...);
+        }
+
+    private:
+#endif
+
         /** ReadWrite Trackers */
         bool m_trackingEnabled;
         ReadWriteTrackerManager *m_trackingManager;

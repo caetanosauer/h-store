@@ -102,6 +102,9 @@ PersistentTable::PersistentTable(ExecutorContext *ctx, bool exportEnabled) :
     m_indexes(NULL), m_indexCount(0), m_pkeyIndex(NULL), m_wrapper(NULL),
     m_tsSeqNo(0), stats_(this), m_exportEnabled(exportEnabled),
     m_COWContext(NULL)
+#ifdef FINELINE
+    , m_finelineLogger(ctx)
+#endif
 {
 
 #ifdef ANTICACHE
@@ -135,6 +138,9 @@ PersistentTable::PersistentTable(ExecutorContext *ctx, const std::string name, b
     m_indexes(NULL), m_indexCount(0), m_pkeyIndex(NULL), m_wrapper(NULL),
     m_tsSeqNo(0), stats_(this), m_exportEnabled(exportEnabled),
     m_COWContext(NULL)
+#ifdef FINELINE
+    , m_finelineLogger(ctx)
+#endif
 {
 
 #ifdef ANTICACHE
@@ -624,8 +630,7 @@ bool PersistentTable::insertTuple(TableTuple &source) {
 #endif
 
 #ifdef FINELINE
-    // CS: Just testing for now: create and commit a single txn with some dummy logrec
-    fineline::DftTxnContext ctx {true};
+    // CS: Just testing for now
     m_finelineLogger.log(LRType::Insert, 4711, "test");
 #endif
 

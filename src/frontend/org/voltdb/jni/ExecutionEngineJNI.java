@@ -956,4 +956,24 @@ public class ExecutionEngineJNI extends ExecutionEngine {
     	checkErrorCode(errorCode);
     }
 
+	@Override
+	public void beginFinelineTxn() {
+		final int errorCode = nativeBeginFinelineTxn(pointer);
+		checkErrorCode(errorCode);	
+	}
+
+	@Override
+	public void commitFinelineTxn() {
+		final int errorCode = nativeCommitFinelineTxn(pointer);
+		checkErrorCode(errorCode);
+	}
+
+	@Override
+	public void abortFinelineTxn() {
+		final int errorCode = nativeAbortFinelineTxn(pointer);
+		checkErrorCode(errorCode);
+	}
+    
+    
+
 }

@@ -95,6 +95,46 @@ class AntiCacheEvictionManager;
 class EvictionIterator;
 #endif
 
+#ifdef FINELINE
+using LRType = foster::LRType;
+
+class FinelineLogger
+{
+public:
+    FinelineLogger(ExecutorContext* ctx)
+        : ctx_(ctx), seq_(0), id_(get_next_id())
+    {
+    }
+
+    void initialize(uint32_t id, bool logit = true)
+    {
+        id_ = static_cast<fineline::NodeIdType>(id);
+        if (logit) {
+            fineline::DftLogrecHeader hdr {id_, ++seq_, LRType::Construct};
+            ctx_->finelineLogAction(hdr);
+        }
+    }
+
+    template <typename... T>
+    void log(const LRType& type, const T&... args)
+    {
+        fineline::DftLogrecHeader hdr {id_, ++seq_, type};
+        ctx_->finelineLogAction(hdr, args...);
+    }
+
+private:
+    ExecutorContext* ctx_;
+    fineline::SeqNumType seq_;
+    fineline::NodeIdType id_;
+
+    static fineline::NodeIdType get_next_id()
+    {
+        static fineline::NodeIdType id = 0;
+        return id++;
+    }
+};
+#endif
+
 /**
  * Represents a non-temporary table which permanently resides in
  * storage and also registered to Catalog (see other documents for
@@ -437,9 +477,7 @@ protected:
     boost::scoped_ptr<RecoveryContext> m_recoveryContext;
 
 #ifdef FINELINE
-    fineline::DftLogger m_finelineLogger;
-
-    using LRType = foster::LRType;
+    FinelineLogger m_finelineLogger;
 #endif
 };
 

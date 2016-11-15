@@ -960,7 +960,15 @@ public abstract class ExecutionEngine implements FastDeserializer.Deserializatio
     // FineLine
     // ----------------------------------------------------------------------------
     public abstract void finelineInit(String args);
-
     protected native int nativeFinelineInit(long pointer, String args);
-   
+    
+    public abstract void beginFinelineTxn();
+    protected native int nativeBeginFinelineTxn(long pointer);
+    
+    public abstract void commitFinelineTxn();
+    protected native int nativeCommitFinelineTxn(long pointer);
+    
+    public abstract void abortFinelineTxn();
+    protected native int nativeAbortFinelineTxn(long pointer);
+
 }

@@ -602,6 +602,11 @@ public abstract class VoltProcedure implements Poolable {
                     }
                 }
                 
+                // Initialize FineLine TxnContext before starting execution (i.e., begin txn)
+                if (hstore_conf.site.fineline) {
+                	this.executor.getExecutionEngine().beginFinelineTxn();
+                }
+                
                 Object rawResult = this.procMethod.invoke(this, this.procParams);
                 this.results = this.getResultsFromRawResults(rawResult);
                 if (this.results == null) results = HStoreConstants.EMPTY_RESULT;
@@ -617,6 +622,11 @@ public abstract class VoltProcedure implements Poolable {
                         }
                 
                     }
+                }
+                
+                // Execution finished, no exception thrown -- we may now commit
+                if (hstore_conf.site.fineline) {
+                	this.executor.getExecutionEngine().commitFinelineTxn();
                 }
                 
             } catch (IllegalAccessException e) {
@@ -654,6 +664,12 @@ public abstract class VoltProcedure implements Poolable {
                 if (this.workloadTraceEnable && this.workloadTxnHandle != null) {
                     ProcedureProfiler.workloadTrace.abortTransaction(this.workloadTxnHandle);
                 }
+                
+                // Abort FineLine transaction
+                if (hstore_conf.site.fineline) {
+                	this.executor.getExecutionEngine().abortFinelineTxn();
+                }
+                
             // -------------------------------
             // MispredictionException
             // -------------------------------

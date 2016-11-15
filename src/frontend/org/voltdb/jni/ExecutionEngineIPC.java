@@ -1553,4 +1553,19 @@ public class ExecutionEngineIPC extends ExecutionEngine {
     	throw new NotImplementedException("FineLine logging and recovery is disabled for IPC ExecutionEngine");
     }
 
+	@Override
+	public void beginFinelineTxn() {
+		throw new NotImplementedException("FineLine logging and recovery is disabled for IPC ExecutionEngine");
+	}
+
+	@Override
+	public void commitFinelineTxn() {
+		throw new NotImplementedException("FineLine logging and recovery is disabled for IPC ExecutionEngine");
+	}
+
+	@Override
+	public void abortFinelineTxn() {
+		throw new NotImplementedException("FineLine logging and recovery is disabled for IPC ExecutionEngine");
+	}
+
 }
