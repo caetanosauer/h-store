@@ -509,6 +509,7 @@ if CTX.FINELINE:
     with pushd(flPath):
         cmakeArgs = ""
         if CTX.LEVEL == "DEBUG":
+            print("CMake DEBUG flag is on")
             cmakeArgs = "-DCMAKE_BUILD_TYPE=Debug3"
 
         retval = os.system("cmake .. %s" % cmakeArgs)
@@ -516,7 +517,7 @@ if CTX.FINELINE:
         if retval != 0:
             sys.exit(-1)
 
-        retval = os.system("make -j%d fineline" % numHardwareThreads)
+        retval = os.system("make -j%d legacy fineline" % numHardwareThreads)
         print("Make returned: ", retval)
         if retval != 0:
             sys.exit(-1)
