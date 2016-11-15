@@ -86,6 +86,59 @@
 
 #include <map>
 
+#ifdef FINELINE
+namespace foster {
+/*
+ * Specialization of the foster::InlineEncoder template to serialize
+ * (inlined) H-store tuples into log pages.
+ */
+template <>
+class InlineEncoder<voltdb::TableTuple>
+{
+public:
+
+    using Type = voltdb::TableTuple;
+    // WARNING: this must match the length field in TableTuple::serializeTo
+    using LengthType = int32_t;
+
+    static size_t get_payload_length(const Type& value)
+    {
+        LengthType length = 0;
+        for (int j = 0; j < value.getSchema()->columnCount(); ++j) {
+            length += value.getNValue(j).getSerializedLength();
+        }
+        return sizeof(LengthType) + length;
+    }
+
+    static size_t get_payload_length(void* ptr)
+    {
+        return static_cast<size_t>(*(reinterpret_cast<LengthType*>(ptr)))
+            + sizeof(LengthType);
+    }
+
+    static char* encode(char* dest, const Type& value)
+    {
+        // capacity can be initalized to max, beacuse caller guarantees that
+        // enough buffer space is available by calling get_payload_length before
+        voltdb::ReferenceSerializeOutput sout {dest, std::numeric_limits<LengthType>::max()};
+        value.serializeTo(sout);
+        return dest + sout.position();
+    }
+
+    static const char* decode(const char* src, Type* value_p)
+    {
+        LengthType length = *(reinterpret_cast<const LengthType*>(src));
+        if (value_p) {
+            voltdb::ReferenceSerializeInput sin {src + sizeof(LengthType), length};
+            value_p->deserializeFrom(sin, nullptr /* dataPool */);
+        }
+        return src + sizeof(LengthType) + length;
+    }
+};
+
+} // namespace foster
+#endif
+
 namespace voltdb {
 
 void* keyTupleStorage = NULL;
@@ -630,8 +683,7 @@ bool PersistentTable::insertTuple(TableTuple &source) {
 #endif
 
 #ifdef FINELINE
-    // CS: Just testing for now
-    m_finelineLogger.log(LRType::Insert, 4711, "test");
+    m_finelineLogger.log(LRType::Insert, m_tmpTarget1);
 #endif
 
     return true;
