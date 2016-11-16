@@ -917,7 +917,8 @@ public final class HStoreConf {
         public boolean snapshot_reset;        
                     
         @ConfigProperty(
-                description="How often in milliseconds should we take snapshots in HStoreSite ",
+                description="How often in milliseconds should we take snapshots in HStoreSite " +
+                			" (0 = always running, negative = never)",
                 defaultInt=10000,
                 experimental=true
             )

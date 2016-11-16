@@ -1088,6 +1088,13 @@ public class HStoreSite implements VoltProcedureListener.Handler, Shutdownable, 
             }
         }
         
+        // Snapshots
+        if (hstore_conf.site.snapshot && hstore_conf.site.snapshot_interval >= 0) {
+        	int interval = hstore_conf.site.snapshot_interval;
+        	this.threadManager.schedulePeriodicWork(
+        			this.snapshotter, interval, interval, TimeUnit.MILLISECONDS);
+        }
+        
         // small stats samples
         this.threadManager.schedulePeriodicWork(new ExceptionHandlingRunnable() {
             @Override
