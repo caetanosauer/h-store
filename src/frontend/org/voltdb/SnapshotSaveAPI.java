@@ -17,25 +17,30 @@
 
 package org.voltdb;
 
-import java.io.*;
-import java.util.*;
+import java.io.File;
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.io.StringWriter;
+import java.util.ArrayDeque;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Deque;
+import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.apache.log4j.Logger;
 import org.voltdb.SnapshotSiteProcessor.SnapshotTableTask;
 import org.voltdb.catalog.CatalogMap;
-import org.voltdb.catalog.Cluster;
 import org.voltdb.catalog.Host;
+import org.voltdb.catalog.Partition;
 import org.voltdb.catalog.Site;
 import org.voltdb.catalog.Table;
-import org.voltdb.catalog.Partition;
 import org.voltdb.sysprocs.SnapshotRegistry;
 import org.voltdb.sysprocs.SnapshotSave;
 import org.voltdb.sysprocs.saverestore.SnapshotUtil;
 
 import edu.brown.catalog.CatalogUtil;
 import edu.brown.hstore.PartitionExecutor.SystemProcedureExecutionContext;
-import edu.brown.utils.CollectionUtil;
 
 /**
  * SnapshotSaveAPI extracts reusuable snapshot production code
@@ -332,6 +337,7 @@ public class SnapshotSaveAPI
                     int index = partition_id - lowest_partition_id;    
                     
                     // Each partition gets a partitioned task
+                    SnapshotSiteProcessor.m_taskListsForSites.get(index).clear();
                     for (SnapshotTableTask t : partitionedSnapshotTasks) {
                         SnapshotSiteProcessor.m_taskListsForSites.get(index).offer(t);
                     }               
