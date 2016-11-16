@@ -43,6 +43,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.apache.commons.collections15.buffer.CircularFifoBuffer;
 import org.apache.log4j.Logger;
@@ -952,11 +953,27 @@ public class HStoreSite implements VoltProcedureListener.Handler, Shutdownable, 
             }
         }
     };
+    
+    private AtomicBoolean snapshotOnQueue = new AtomicBoolean(false);
 
     /**
      * Take snapshots
      */
-    private void takeSnapshot(){
+    private void takeSnapshot()
+    {
+    	synchronized (snapshotOnQueue) {
+	    	while (snapshotOnQueue.get()) {
+	    		try {
+					snapshotOnQueue.wait();
+				} 
+	    		catch (InterruptedException e) {
+	    			if (debug.val) LOG.warn("Snapshot not taken due to InterruptedException");
+					return;
+				}
+	    	}
+	    	snapshotOnQueue.set(true);
+    	}
+    	
         // Do this only on site lowest id
         Host catalog_host = this.getHost();
         Integer lowest_site_id = Integer.MAX_VALUE, s_id;
@@ -994,10 +1011,13 @@ public class HStoreSite implements VoltProcedureListener.Handler, Shutdownable, 
                 RpcCallback<ClientResponseImpl> callback = new RpcCallback<ClientResponseImpl>() {
                     @Override
                     public void run(ClientResponseImpl parameter) {
-                        // Do nothing!
+                    	synchronized (snapshotOnQueue) {
+                    		snapshotOnQueue.set(false);
+                    		snapshotOnQueue.notifyAll();
+                    	}
                     }
                 };
-
+                
                 LocalTransaction ts = this.txnInitializer.createLocalTransaction(
                         null, 
                         EstTime.currentTimeMillis(), 
