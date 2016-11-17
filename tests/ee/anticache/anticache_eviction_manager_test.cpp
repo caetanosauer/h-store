@@ -346,73 +346,73 @@ TEST_F(AntiCacheEvictionManagerTest, FullBackingStore) {
     delete acem;
 }
 
- 
+
 
 #ifndef ANTICACHE_TIMESTAMPS
 TEST_F(AntiCacheEvictionManagerTest, GetTupleID)
 {
-    initTable(true); 
-    
+    initTable(true);
+
     TableTuple tuple = m_table->tempTuple();
-    
+
     tuple.setNValue(0, ValueFactory::getIntegerValue(m_tuplesInserted++));
     tuple.setNValue(1, ValueFactory::getIntegerValue(rand()));
     m_table->insertTuple(tuple);
-    
+
     // get the tuple that was just inserted
-    tuple = m_table->lookupTuple(tuple); 
-    
-    int tuple_id = m_table->getTupleID(tuple.address()); 
-    
-    //ASSERT_NE(tuple_id, -1); 
+    tuple = m_table->lookupTuple(tuple);
+
+    int tuple_id = m_table->getNextTupleInChain(tuple.address());
+
+    //ASSERT_NE(tuple_id, -1);
     ASSERT_EQ(tuple_id, 0);
-    
-    cleanupTable(); 
+
+    cleanupTable();
 }
 
 TEST_F(AntiCacheEvictionManagerTest, NewestTupleID)
 {
-    int inserted_tuple_id, newest_tuple_id; 
-    
-    initTable(true); 
-    
+    int inserted_tuple_id, newest_tuple_id;
+
+    initTable(true);
+
     TableTuple tuple = m_table->tempTuple();
-    
+
     tuple.setNValue(0, ValueFactory::getIntegerValue(m_tuplesInserted++));
     tuple.setNValue(1, ValueFactory::getIntegerValue(rand()));
     m_table->insertTuple(tuple);
-    
+
     // get the tuple that was just inserted
-    tuple = m_table->lookupTuple(tuple); 
-    
-    inserted_tuple_id = m_table->getTupleID(tuple.address()); 
-    newest_tuple_id = m_table->getNewestTupleID(); 
-    
+    tuple = m_table->lookupTuple(tuple);
+
+    inserted_tuple_id = m_table->getNextTupleInChain(tuple.address());
+    newest_tuple_id = m_table->getNewestTupleID();
+
     ASSERT_EQ(inserted_tuple_id, newest_tuple_id);
-    
+
     cleanupTable();
 }
 
 TEST_F(AntiCacheEvictionManagerTest, OldestTupleID)
 {
-    int inserted_tuple_id, oldest_tuple_id; 
-    
-    initTable(true); 
-    
+    int inserted_tuple_id, oldest_tuple_id;
+
+    initTable(true);
+
     TableTuple tuple = m_table->tempTuple();
-    
+
     tuple.setNValue(0, ValueFactory::getIntegerValue(m_tuplesInserted++));
     tuple.setNValue(1, ValueFactory::getIntegerValue(rand()));
     m_table->insertTuple(tuple);
-    
+
     // get the tuple that was just inserted
-    tuple = m_table->lookupTuple(tuple); 
-    
-    inserted_tuple_id = m_table->getTupleID(tuple.address()); 
-    oldest_tuple_id = m_table->getOldestTupleID(); 
-    
+    tuple = m_table->lookupTuple(tuple);
+
+    inserted_tuple_id = m_table->getNextTupleInChain(tuple.address());
+    oldest_tuple_id = m_table->getOldestTupleID();
+
     ASSERT_EQ(inserted_tuple_id, oldest_tuple_id);
-    
+
     cleanupTable();
 }
 
@@ -420,92 +420,92 @@ TEST_F(AntiCacheEvictionManagerTest, OldestTupleID)
 
 TEST_F(AntiCacheEvictionManagerTest, InsertMultipleTuples)
 {
-    int num_tuples = 10; 
+    int num_tuples = 10;
 
-    initTable(true); 
-    
+    initTable(true);
+
     TableTuple tuple = m_table->tempTuple();
-    
-    uint32_t oldest_tuple_id, newest_tuple_id; 
-    
+
+    uint32_t oldest_tuple_id, newest_tuple_id;
+
     for(int i = 0; i < num_tuples; i++) // insert 10 tuples
     {
         tuple.setNValue(0, ValueFactory::getIntegerValue(m_tuplesInserted++));
         tuple.setNValue(1, ValueFactory::getIntegerValue(rand()));
         m_table->insertTuple(tuple);
-        
+
                 tuple = m_table->lookupTuple(tuple);
 
         if(i == 0)
         {
-            oldest_tuple_id = m_table->getTupleID(tuple.address()); 
+            oldest_tuple_id = m_table->getNextTupleInChain(tuple.address());
         }
         else if(i == num_tuples-1)
         {
-            newest_tuple_id = m_table->getTupleID(tuple.address()); 
+            newest_tuple_id = m_table->getNextTupleInChain(tuple.address());
         }
     }
-        
-    ASSERT_EQ(num_tuples, m_table->getNumTuplesInEvictionChain()); 
+
+    ASSERT_EQ(num_tuples, m_table->getNumTuplesInEvictionChain());
     ASSERT_EQ(oldest_tuple_id, m_table->getOldestTupleID());
     ASSERT_EQ(newest_tuple_id, m_table->getNewestTupleID());
-    
+
     cleanupTable();
 }
 
 TEST_F(AntiCacheEvictionManagerTest, DeleteSingleTuple)
 {
-    initTable(true); 
-    
-    TableTuple tuple = m_table->tempTuple(); 
-    
+    initTable(true);
+
+    TableTuple tuple = m_table->tempTuple();
+
     tuple.setNValue(0, ValueFactory::getIntegerValue(m_tuplesInserted++));
     tuple.setNValue(1, ValueFactory::getIntegerValue(rand()));
-    
+
     m_table->insertTuple(tuple);
-    
-    ASSERT_EQ(1, m_table->getNumTuplesInEvictionChain()); 
-    
+
+    ASSERT_EQ(1, m_table->getNumTuplesInEvictionChain());
+
     tuple = m_table->lookupTuple(tuple);
     m_table->deleteTuple(tuple, true);
-    
+
     ASSERT_EQ(0, m_table->getNumTuplesInEvictionChain());
-    
+
     cleanupTable();
 }
 
 TEST_F(AntiCacheEvictionManagerTest, DeleteMultipleTuples)
 {
-    int num_tuples = 100; 
+    int num_tuples = 100;
 
-    initTable(true); 
-      
+    initTable(true);
+
     TableTuple tuple = m_table->tempTuple();
-        
+
     for(int i = 0; i < num_tuples; i++) // insert 10 tuples
     {
         tuple.setNValue(0, ValueFactory::getIntegerValue(m_tuplesInserted++));
         tuple.setNValue(1, ValueFactory::getIntegerValue(rand()));
         m_table->insertTuple(tuple);
     }
-    
+
     VOLT_INFO("%d == %d", num_tuples, m_table->getNumTuplesInEvictionChain());
-    ASSERT_EQ(num_tuples, m_table->getNumTuplesInEvictionChain()); 
-        
-    int num_tuples_deleted = 0; 
-    TableIterator itr(m_table); 
+    ASSERT_EQ(num_tuples, m_table->getNumTuplesInEvictionChain());
+
+    int num_tuples_deleted = 0;
+    TableIterator itr(m_table);
     while(itr.hasNext())  {
-        itr.next(tuple); 
-                
+        itr.next(tuple);
+
         if(rand() % 2 == 0) { // delete each tuple with probability .5
-            m_table->deleteTuple(tuple, true); 
-            ++num_tuples_deleted; 
+            m_table->deleteTuple(tuple, true);
+            ++num_tuples_deleted;
         }
     }
-        
+
 
     ASSERT_EQ((num_tuples - num_tuples_deleted), m_table->getNumTuplesInEvictionChain());
-    
+
     cleanupTable();
 }
 
@@ -513,103 +513,103 @@ TEST_F(AntiCacheEvictionManagerTest, DeleteMultipleTuples)
 //{
 //    int num_tuples = 100000;
 //    int block_size = 1048576; // 1 MB
-//    
+//
 //    initTable(true);
-//    
+//
 //    TableTuple tuple = m_table->tempTuple();
-//    
+//
 //      time_t start;
 //      time_t stop;
-//    
+//
 //    for(int i = 0; i < num_tuples; i++) // insert tuples
 //    {
 //        tuple.setNValue(0, ValueFactory::getIntegerValue(m_tuplesInserted++));
 //        tuple.setNValue(1, ValueFactory::getIntegerValue(rand()));
 //        m_table->insertTuple(tuple);
 //    }
-//    
+//
 //      TableIterator itr(m_table);
 //      time(&start);
 //      m_table->evictBlockToDisk(block_size, 1);
 //      time(&stop);
-//      
+//
 ////    double seconds = difftime(stop, start);
 ////    VOLT_INFO("total time: %f seconds", seconds);
-//    
+//
 //    cleanupTable();
 //}
 
 // TEST_F(AntiCacheEvictionManagerTest, UpdateTuple)
 // {
-//   
-//     int num_tuples = 0; 
-// 
-//     initTable(true); 
-//     
+//
+//     int num_tuples = 0;
+//
+//     initTable(true);
+//
 //     TableTuple tuple = m_table->tempTuple();
-//     
-//     int oldest_tuple_id, newest_tuple_id; 
-//     
+//
+//     int oldest_tuple_id, newest_tuple_id;
+//
 //     for(int i = 0; i < num_tuples; i++) // insert 10 tuples
 //     {
 //         tuple.setNValue(0, ValueFactory::getIntegerValue(m_tuplesInserted++));
 //         tuple.setNValue(1, ValueFactory::getIntegerValue(rand()));
 //         m_table->insertTuple(tuple);
-//         
+//
 //     }
-//          
-//     oldest_tuple_id = m_table->getOldestTupleID(); 
-//     tuple.move(m_table->dataPtrForTuple(oldest_tuple_id)); 
-//     
+//
+//     oldest_tuple_id = m_table->getOldestTupleID();
+//     tuple.move(m_table->dataPtrForTuple(oldest_tuple_id));
+//
 //     // create a new tuple from the old tuple and update its non-key value
-//     TableTuple updated_tuple(tuple); 
+//     TableTuple updated_tuple(tuple);
 //     updated_tuple.setNValue(1, ValueFactory::getIntegerValue(rand()));
-//     
-//     m_table.updateTuple(&tuple, &updated_tuple, false); 
-//     
+//
+//     m_table.updateTuple(&tuple, &updated_tuple, false);
+//
 //     // the oldest tuple was updated, so should now be the newest
-//     ASSERT_EQ(oldest_tuple_id, m_table->getNewestTupleID()); 
-//   
+//     ASSERT_EQ(oldest_tuple_id, m_table->getNewestTupleID());
+//
 // }
 #else
 TEST_F(AntiCacheEvictionManagerTest, GetTupleTimeStamp)
 {
-    initTable(true); 
-    
+    initTable(true);
+
     TableTuple tuple = m_table->tempTuple();
-    
+
     tuple.setNValue(0, ValueFactory::getIntegerValue(m_tuplesInserted++));
     tuple.setNValue(1, ValueFactory::getIntegerValue(rand()));
     m_table->insertTuple(tuple);
-    
+
     // get the tuple that was just inserted
-    tuple = m_table->lookupTuple(tuple); 
-    
+    tuple = m_table->lookupTuple(tuple);
+
     uint32_t time_stamp = tuple.getTimeStamp();
 
     ASSERT_NE(time_stamp, 0);
-    
-    cleanupTable(); 
+
+    cleanupTable();
 }
 
 TEST_F(AntiCacheEvictionManagerTest, TestEvictionOrder)
 {
-    int num_tuples = 100; 
+    int num_tuples = 100;
 
-    initTable(true); 
-      
+    initTable(true);
+
     TableTuple tuple = m_table->tempTuple();
     int tuple_size = m_tableSchema->tupleLength() + TUPLE_HEADER_SIZE;
 
-        
+
     for(int i = 0; i < num_tuples; i++) // insert 10 tuples
     {
         tuple.setNValue(0, ValueFactory::getIntegerValue(m_tuplesInserted++));
         tuple.setNValue(1, ValueFactory::getIntegerValue(rand()));
         m_table->insertTuple(tuple);
     }
-    
-    EvictionIterator itr(m_table); 
+
+    EvictionIterator itr(m_table);
 
     itr.reserve(20 * tuple_size);
 
@@ -618,8 +618,8 @@ TEST_F(AntiCacheEvictionManagerTest, TestEvictionOrder)
     uint32_t oldTimeStamp = 0;
 
     while(itr.hasNext()) {
-        itr.next(tuple); 
-        
+        itr.next(tuple);
+
         uint32_t newTimeStamp = tuple.getTimeStamp();
         ASSERT_LE(oldTimeStamp, newTimeStamp);
         oldTimeStamp = newTimeStamp;
@@ -633,7 +633,7 @@ TEST_F(AntiCacheEvictionManagerTest, TestSetEntryToNewAddress)
 {
     int num_tuples = 20;
 
-    initTable(true); 
+    initTable(true);
 
     TableTuple tuple = m_table->tempTuple();
 
@@ -650,12 +650,12 @@ TEST_F(AntiCacheEvictionManagerTest, TestSetEntryToNewAddress)
     }
 
     TableIterator itr1(m_table);
-    iterations = 0; 
+    iterations = 0;
 
     itr1.next(tuple);
 
     void* oldAddress = tuple.address();
-    
+
     m_table->setEntryToNewAddressForAllIndexes(&tuple, (void*)0xdeadbeaf, oldAddress);
 
     std::vector <TableIndex*> allIndexes = m_table->allIndexes();
@@ -685,9 +685,9 @@ TEST_F(AntiCacheEvictionManagerTest, UpdateIndexPerformance)
     struct timeval start, end;
 
     long  seconds, useconds;
-    double mtime; 
+    double mtime;
 
-    initTable(true); 
+    initTable(true);
 
     TableTuple tuple = m_table->tempTuple();
 
@@ -701,7 +701,7 @@ TEST_F(AntiCacheEvictionManagerTest, UpdateIndexPerformance)
     }
 
     TableIterator itr1(m_table);
-    iterations = 0; 
+    iterations = 0;
     gettimeofday(&start, NULL);
     while(itr1.hasNext())
     {
@@ -709,7 +709,7 @@ TEST_F(AntiCacheEvictionManagerTest, UpdateIndexPerformance)
         m_table->setEntryToNewAddressForAllIndexes(&tuple, NULL, (m_table->lookupTuple(tuple)).address());
 
         if(++iterations == 1000)
-            break; 
+            break;
     }
     gettimeofday(&end, NULL);
 

@@ -279,7 +279,7 @@ TEST_F(ExpressionTest, SimpleAddition) {
     e.push(new CV(EXPRESSION_TYPE_VALUE_CONSTANT, VALUE_TYPE_TINYINT, 1, (int64_t)1));
     e.push(new AE(EXPRESSION_TYPE_OPERATOR_PLUS, VALUE_TYPE_TINYINT, 1));
     e.push(new CV(EXPRESSION_TYPE_VALUE_CONSTANT, VALUE_TYPE_TINYINT, 1, (int64_t)4));
-    auto_ptr<AbstractExpression> testexp(convertToExpression(e));
+    shared_ptr<AbstractExpression> testexp(convertToExpression(e));
 
     NValue result = testexp->eval(&junk,NULL);
     ASSERT_EQ(ValuePeeker::peekAsBigInt(result), 5LL);
@@ -299,7 +299,7 @@ TEST_F(ExpressionTest, SimpleMultiplication) {
     e.push(new AE(EXPRESSION_TYPE_OPERATOR_MULTIPLY, VALUE_TYPE_TINYINT, 1));
     e.push(new CV(EXPRESSION_TYPE_VALUE_CONSTANT, VALUE_TYPE_TINYINT, 1, (int64_t)5));
 
-    auto_ptr<AbstractExpression> e1(convertToExpression(e));
+    shared_ptr<AbstractExpression> e1(convertToExpression(e));
     NValue r1 = e1->eval(&junk,NULL);
     ASSERT_EQ(ValuePeeker::peekAsBigInt(r1), 25LL);
 
@@ -310,7 +310,7 @@ TEST_F(ExpressionTest, SimpleMultiplication) {
     e.push(new AE(EXPRESSION_TYPE_OPERATOR_PLUS, VALUE_TYPE_TINYINT, 1));
     e.push(new CV(EXPRESSION_TYPE_VALUE_CONSTANT, VALUE_TYPE_TINYINT, 1, (int64_t)3));
 
-    auto_ptr<AbstractExpression> e2(convertToExpression(e));
+    shared_ptr<AbstractExpression> e2(convertToExpression(e));
     NValue r2 = e2->eval(&junk,NULL);
     ASSERT_EQ(ValuePeeker::peekAsBigInt(r2), 13LL);
 }

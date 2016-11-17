@@ -84,21 +84,39 @@ namespace voltdb {
  |  flags (1 byte)  |  time stamp (4 bytes) | tuple data  |
  ----------------------------------------------------------
 
+ (e). Fineline adds a page ID field consuming 4 extra bytes in each of the above representations
+
  */
 
+struct alignas(1) TableTupleHeader {
+
 #ifdef ANTICACHE
-    #ifdef ANTICACHE_TIMESTAMPS
-    	#define TUPLE_HEADER_SIZE 5
-    #else
-    	#ifdef ANTICACHE_REVERSIBLE_LRU
-        	#define TUPLE_HEADER_SIZE 9
-    	#else
-        	#define TUPLE_HEADER_SIZE 5
-    	#endif
-    #endif
+#ifdef ANTICACHE_TIMESTAMPS
+    uint32_t timestamp;
 #else
-    #define TUPLE_HEADER_SIZE 1
+    uint32_t next;
+    #ifdef ANTICACHE_REVERSIBLE_LRU
+        uint32_t prev;
+    #endif
 #endif
+#endif
+
+#ifdef FINELINE
+    uint32_t page_id;
+#endif
+
+    uint8_t flags;
+
+};
+
+#ifndef ANTICACHE
+#ifndef FINELINE
+static_assert(sizeof(TableTupleHeader) == 1,
+        "Tuple header should not take more than 1 byte of space");
+#endif
+#endif
+
+#define TUPLE_HEADER_SIZE static_cast<int>(sizeof(TableTupleHeader))
 
 #define DELETED_MASK 1
 #define DIRTY_MASK 2
@@ -139,6 +157,18 @@ public:
 
     /** Assignment operator */
     TableTuple& operator=(const TableTuple &rhs);
+
+    /**
+     * Get access to tuple header struct
+     */
+    TableTupleHeader& header()
+    {
+        return *(reinterpret_cast<TableTupleHeader*>(m_data));
+    }
+    const TableTupleHeader& header() const
+    {
+        return *(reinterpret_cast<TableTupleHeader*>(m_data));
+    }
 
     /**
      * Set the tuple to point toward a given address in a table's
@@ -266,25 +296,25 @@ public:
 
     /** Is the tuple deleted or active? */
     inline bool isActive() const {
-        return (*(reinterpret_cast<const char*> (m_data)) & DELETED_MASK) == 0 ? true : false;
+        return (header().flags & DELETED_MASK) == 0 ? true : false;
     }
 
     /** Is the tuple deleted or active? */
     inline bool isDirty() const {
-        return (*(reinterpret_cast<const char*> (m_data)) & DIRTY_MASK) == 0 ? false : true;
+        return (header().flags & DIRTY_MASK) == 0 ? false : true;
     }
 
     inline bool isEvicted() const {
-        return (*(reinterpret_cast<const char*> (m_data)) & EVICTED_MASK) == 0 ? false : true;
+        return (header().flags & EVICTED_MASK) == 0 ? false : true;
     }
 
     inline bool isNVMEvicted() const {
-        return (*(reinterpret_cast<const char*> (m_data)) & NVMEVICTED_MASK) == 0 ? false : true;
+        return (header().flags & NVMEVICTED_MASK) == 0 ? false : true;
     }
 
 #ifdef ANTICACHE_COUNTER
     inline bool isTempMerged() const {
-        return (*(reinterpret_cast<const char*> (m_data)) & TEMPMERGED_MASK) == 0 ? false : true;
+        return (header().flags & TEMPMERGED_MASK) == 0 ? false : true;
     }
 #endif
 
@@ -305,33 +335,24 @@ public:
 #ifdef ANTICACHE
 	#ifndef ANTICACHE_TIMESTAMPS
     	inline uint32_t getNextTupleInChain() {
-        	uint32_t tuple_id = 0;
-	        memcpy(&tuple_id, m_data+TUPLE_HEADER_SIZE-4, 4);
-
-    	    return tuple_id;
+            return header().next;
     	}
 
-	    inline void setNextTupleInChain(uint32_t next) {
-    	    memcpy(m_data+TUPLE_HEADER_SIZE-4, &next, 4);
-
+        inline void setNextTupleInChain(uint32_t next) {
+            header().next = next;
     	}
 
     	inline uint32_t getPreviousTupleInChain() {
-        	uint32_t tuple_id = 0;
-        	memcpy(&tuple_id, m_data+TUPLE_HEADER_SIZE-8, 4);
-        	return tuple_id;
+            return header().prev;
     	}
 
     	inline void setPreviousTupleInChain(uint32_t prev) {
-        	memcpy(m_data+TUPLE_HEADER_SIZE-8, &prev, 4);
+            header().prev = prev;
     	}
 
 	#else
     	inline uint32_t getTimeStamp() {
-        	uint32_t time_stamp = 0;
-	        memcpy(&time_stamp, m_data+TUPLE_HEADER_SIZE-4, 4);
-
-    	    return time_stamp;
+            return header().timestamp;
     	}
 
         static uint64_t rdtsc() {
@@ -342,28 +363,27 @@ public:
 
         inline void setTimeStamp() {
             uint32_t current_time = (uint32_t)(rdtsc() >> 32);
-            memcpy(m_data+TUPLE_HEADER_SIZE-4, &current_time, 4);
+            header().timestamp = current_time;
         }
 
         inline void setColdTimeStamp() {
             uint32_t cold_time = 0;
-            memcpy(m_data+TUPLE_HEADER_SIZE-4, &cold_time, 4);
+            header().timestamp = cold_time;
+        }
+        #endif
+#endif
+
+#ifdef FINELINE
+        inline uint32_t getPageID()
+        {
+            return header().page_id;
+        }
+
+        inline void setPageID(uint32_t pid)
+        {
+            header().page_id = pid;
         }
 #endif
-#endif
-
-        inline uint32_t getTupleID()
-        {
-            uint32_t tuple_id;
-            memcpy(&tuple_id, m_data+TUPLE_HEADER_SIZE-4, 4);
-
-            return tuple_id;
-        }
-
-        inline void setTupleID(uint32_t tuple_id)
-        {
-            memcpy(m_data+TUPLE_HEADER_SIZE-4, &tuple_id, 4);
-        }
 
         /** Get the value of a specified column (const) */
         //not performant because it has to check the schema to see how to
@@ -421,42 +441,42 @@ public:
     size_t hashCode(size_t seed) const;
     size_t hashCode() const;
     inline void setEvictedTrue() {
-        *(reinterpret_cast<char*> (m_data)) |= static_cast<char>(EVICTED_MASK);
+        header().flags |= static_cast<uint8_t>(EVICTED_MASK);
     }
     inline void setEvictedFalse() {
-        *(reinterpret_cast<char*> (m_data)) &= static_cast<char>(~EVICTED_MASK);
+        header().flags &= static_cast<uint8_t>(~EVICTED_MASK);
     }
     inline void setNVMEvictedTrue() {
-        *(reinterpret_cast<char*> (m_data)) |= static_cast<char>(NVMEVICTED_MASK);
+        header().flags |= static_cast<uint8_t>(NVMEVICTED_MASK);
     }
     inline void setNVMEvictedFalse() {
-        *(reinterpret_cast<char*> (m_data)) &= static_cast<char>(~NVMEVICTED_MASK);
+        header().flags &= static_cast<uint8_t>(~NVMEVICTED_MASK);
     }
 #ifdef ANTICACHE_COUNTER
     inline void setTempMergedTrue() {
-        *(reinterpret_cast<char*> (m_data)) |= static_cast<char>(TEMPMERGED_MASK);
+        header().flags |= static_cast<uint8_t>(TEMPMERGED_MASK);
     }
     inline void setTempMergedFalse() {
-        *(reinterpret_cast<char*> (m_data)) &= static_cast<char>(~TEMPMERGED_MASK);
+        header().flags &= static_cast<uint8_t>(~TEMPMERGED_MASK);
     }
 #endif
     inline void setDeletedFalse() {
         // treat the first "value" as a boolean flag
-        *(reinterpret_cast<char*> (m_data)) &= static_cast<char>(~DELETED_MASK);
+        header().flags &= static_cast<uint8_t>(~DELETED_MASK);
     }
 
 protected:
         inline void setDeletedTrue() {
             // treat the first "value" as a boolean flag
-            *(reinterpret_cast<char*> (m_data)) |= static_cast<char>(DELETED_MASK);
+            header().flags |= static_cast<uint8_t>(DELETED_MASK);
         }
         inline void setDirtyTrue() {
             // treat the first "value" as a boolean flag
-            *(reinterpret_cast<char*> (m_data)) |= static_cast<char>(DIRTY_MASK);
+            header().flags |= static_cast<uint8_t>(DIRTY_MASK);
         }
         inline void setDirtyFalse() {
             // treat the first "value" as a boolean flag
-            *(reinterpret_cast<char*> (m_data)) &= static_cast<char>(~DIRTY_MASK);
+            header().flags &= static_cast<uint8_t>(~DIRTY_MASK);
         }
 
 

@@ -206,7 +206,7 @@ TEST_F(PersistentTableLogTest, TupleIds) {
     iterator = m_table->tableIterator();
     std::set<uint32_t> tupleIds;
     while (iterator.next(tuple)) {
-        uint32_t id = m_table->getTupleID(tuple.address());
+        uint32_t id = m_table->getNextTupleInChain(tuple.address());
 //         printf("[%d] -- %s\n\n", id, tuple.debug(m_table->name()).c_str());
         ASSERT_EQ(0, tupleIds.count(id));
         tupleIds.insert(id);
