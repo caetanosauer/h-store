@@ -57,7 +57,7 @@
 
 
 namespace voltdb {
-    
+
     class Table;
     class PersistentTable;
     class MMAP_PersistentTable;
@@ -66,7 +66,7 @@ namespace voltdb {
     class TableColumn;
     class TableIndex;
     class ExecutorContext;
-    
+
     class TableFactory {
     public:
         /**
@@ -86,7 +86,7 @@ namespace voltdb {
                                          int partitionColumn,
                                          bool exportEnabled,
                                          bool exportOnly);
-        
+
         /**
          * Creates an empty persistent table with given ID, name, columns and PK index.
          */
@@ -100,8 +100,8 @@ namespace voltdb {
                                          int partitionColumn,
                                          bool exportEnabled,
                                          bool exportOnly);
-        
-        
+
+
         /**
          * Creates an empty persistent table with given name, columns and indexes.
          */
@@ -115,8 +115,8 @@ namespace voltdb {
                                          int partitionColumn,
                                          bool exportEnabled,
                                          bool exportOnly);
-        
-        
+
+
         /**
          * Creates an empty persistent table with given name, columns, PK index and indexes.
          */
@@ -131,7 +131,7 @@ namespace voltdb {
                                          int partitionColumn,
                                          bool exportEnabled,
                                          bool exportOnly);
-        
+
         #ifdef ANTICACHE
         static Table* getEvictedTable(voltdb::CatalogId databaseId,
                                       ExecutorContext *ctx,
@@ -144,8 +144,8 @@ namespace voltdb {
                                       TupleSchema* schema,
                                       const std::string* columnNames);
         #endif
-        
-        
+
+
         /**
          * Creates an empty temp table with given name and columns.
          * Every TempTable must be instantiated via these factory methods.
@@ -157,7 +157,7 @@ namespace voltdb {
                                        TupleSchema* schema,
                                        const std::string* columnNames,
                                        int* tempTableMemoryInBytes);
-        
+
         /**
          * Creates an empty temp table with given template table.
          */
@@ -165,7 +165,7 @@ namespace voltdb {
                                              const std::string &name,
                                              const Table* templateTablezz,
                                              int* tempTableMemoryInBytes);
-       
+
     private:
         static void initConstraints(PersistentTable* table);
         static void initCommon(
@@ -201,7 +201,7 @@ namespace voltdb {
                                Table *table);
 
     };
-        
+
 
 }
 

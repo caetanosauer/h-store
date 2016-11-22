@@ -42,7 +42,7 @@
  * ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
  * OTHER DEALINGS IN THE SOFTWARE.
  */
-  
+
 #include <sstream>
 #include "tablefactory.h"
 #include "common/executorcontext.hpp"
@@ -127,7 +127,7 @@ Table* TableFactory::getPersistentTable(
 
         VOLT_DEBUG("MMAP Enabled: %s",
                   ((int)ctx->isMMAPEnabled() != 0 ? "true" : "false"));
-        
+
         PersistentTable *pTable = dynamic_cast<PersistentTable*>(table);
         TableFactory::initCommon(databaseId, pTable, name, schema, columnNames, true);
         pTable->m_indexCount = (int)indexes.size();

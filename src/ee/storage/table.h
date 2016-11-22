@@ -113,7 +113,7 @@ class Table {
     friend class ExecutionEngine;
     friend class TableStats;
     friend class StatsSource;
-    friend class EvictionIterator; 
+    friend class EvictionIterator;
 
   private:
     // no default constructor, no copy
@@ -161,16 +161,16 @@ public:
     // TUPLES AND MEMORY USAGE
     // ------------------------------------------------------------------
     virtual size_t allocatedBlockCount() const = 0;
-    
+
     TableTuple& tempTuple() {
         assert (m_tempTuple.m_data);
         return m_tempTuple;
     }
-    
+
     int64_t allocatedTupleCount() const {
         return allocatedBlockCount() * m_tuplesPerBlock;
     }
-    
+
     /**
      * Includes tuples that are pending any kind of delete.
      * Used by iterators to determine how many tupels to expect while scanning
@@ -178,55 +178,55 @@ public:
     virtual int64_t activeTupleCount() const {
         return m_tupleCount;
     }
-    
+
     /*
      * Count of tuples that actively contain user data
      */
     int64_t usedTupleCount() const {
         return m_usedTuples;
     }
-    
+
     virtual int64_t allocatedTupleMemory() const {
         return allocatedBlockCount() * m_tableAllocationSize;
     }
-    
+
     int64_t occupiedTupleMemory() const {
         return m_tupleCount * m_tempTuple.tupleLength();
     }
-    
+
     // Only counts persistent table usage, currently
     int64_t nonInlinedMemorySize() const {
         return m_nonInlinedMemorySize;
     }
-    
+
     /**
      * Estimate for the number of times that tuples are accessed (either for a read or write)
      */
     inline int64_t getTupleAccessCount() const {
         return m_tupleAccesses;
     }
-    
+
     inline void updateTupleAccessCount() {
         m_tupleAccesses++;
     }
-    
+
     #ifdef ANTICACHE
     inline int32_t getTuplesEvicted() const { return (m_tuplesEvicted); }
     inline int32_t getBlocksEvicted() const { return (m_blocksEvicted); }
     inline int64_t getBytesEvicted()  const { return (m_bytesEvicted); }
-    
+
     inline int32_t getTuplesWritten() const { return (m_tuplesWritten); }
     inline int32_t getBlocksWritten() const { return (m_blocksWritten); }
     inline int64_t getBytesWritten()  const { return (m_bytesWritten); }
-    
+
     inline int32_t getTuplesRead() const { return (m_tuplesRead); }
     inline int32_t getBlocksRead() const { return (m_blocksRead); }
     inline int64_t getBytesRead()  const { return (m_bytesRead); }
 
     virtual std::vector<AntiCacheDB*> allACDBs() const;
     #endif
-    
-    int getTupleID(const char* tuple_address); 
+
+    int getTupleID(const char* tuple_address);
 
     uint32_t getTableID() { return m_tableID; }
 
@@ -360,7 +360,7 @@ public:
     MMAPMemoryManager* getDataManager(){
       return (m_data_manager);
     }
-    
+
 protected:
     Table(int tableAllocationTargetSize);
     Table(int tableAllocationTargetSize, bool enableMMAP);
@@ -393,7 +393,7 @@ protected:
     uint32_t m_tuplesPerBlock;
     uint32_t m_tupleLength;
     int64_t m_nonInlinedMemorySize;
-    
+
 #ifdef FINELINE
     // Intitialized by TableFactory::initCommon
     uint32_t m_tableID;
@@ -410,12 +410,12 @@ protected:
     int32_t m_tuplesEvicted;
     int32_t m_blocksEvicted;
     int64_t m_bytesEvicted;
-    
+
     // GLOBAL WRITTEN
     int32_t m_tuplesWritten;
     int32_t m_blocksWritten;
     int64_t m_bytesWritten;
-    
+
     // GLOBAL READ
     int32_t m_tuplesRead;
     int32_t m_blocksRead;
@@ -469,7 +469,7 @@ protected:
 
     /** MMAP Data Storage **/
     MMAPMemoryManager* m_data_manager;
-    
+
   private:
     int32_t m_refcount;
 
@@ -482,14 +482,14 @@ protected:
  * is valid.
  */
 inline char* Table::dataPtrForTuple(const int index) const {
-    
+
 //    VOLT_INFO("index: %d", index);
-    
+
     size_t blockIndex = index / m_tuplesPerBlock;
-    
+
 //    if(blockIndex >= m_data.size())
 //        VOLT_INFO("index: %d, block index: %d", index, (int)blockIndex);
-    
+
     assert (blockIndex < m_data.size());
     char *block = m_data[blockIndex];
     char *retval = block + ((index % m_tuplesPerBlock) * m_tupleLength);
@@ -537,44 +537,44 @@ inline void Table::allocateNextBlock() {
         }
     }
 }
-    
+
 inline int Table::getTupleID(const char* tuple_address)
-{    
-    char* addr; 
-    int tuple_id = 0; 
-    
-    int tuple_size = m_schema->tupleLength() + TUPLE_HEADER_SIZE; 
+{
+    char* addr;
+    int tuple_id = 0;
+
+    int tuple_size = m_schema->tupleLength() + TUPLE_HEADER_SIZE;
     long offset;
-    
+
     for(int i = 0; i < m_data.size(); i++)  // iterate through blocks
     {
-        addr = m_data[i]; 
-        
+        addr = m_data[i];
+
         // tuple cannot be in this block, so increment id and skip to the next block
         if((tuple_address < addr) || (tuple_address > (addr + (tuple_size*m_tuplesPerBlock)))
            )
         {
-            tuple_id += m_tuplesPerBlock; 
-            continue; 
+            tuple_id += m_tuplesPerBlock;
+            continue;
         }
 
         offset = ((long)tuple_address - (long)addr) / tuple_size;
         if (addr + offset * tuple_size == tuple_address)
             return tuple_id + (int)offset;
-        
+
         /*for(int j = 0; j < m_tuplesPerBlock; j++)  // iterate through tuples in a block
         {
             if(addr == tuple_address)
             {
-                return tuple_id; 
+                return tuple_id;
             }
-            
+
             addr += tuple_size; // advance pointer to next tuple
-            tuple_id++; 
+            tuple_id++;
         }*/
-        
+
     }
-    
+
     return -1; // no matching tuple was found
 }
 
