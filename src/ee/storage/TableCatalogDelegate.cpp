@@ -261,14 +261,16 @@ TableCatalogDelegate::init(ExecutorContext *executorContext,
     // no primary key
     if (pkey_index_id.size() == 0) {
         m_table = TableFactory::getPersistentTable(databaseId, executorContext,
-                                                 catalogTable.name(), schema, columnNames,
+                                                 catalogTable.name(), table_id,
+                                                 schema, columnNames,
                                                  indexes, partitionColumnIndex,
                                                  isExportEnabledForTable(catalogDatabase, table_id),
                                                  isTableExportOnly(catalogDatabase, table_id));
         
     } else {
         m_table = TableFactory::getPersistentTable(databaseId, executorContext,
-                                                 catalogTable.name(), schema, columnNames,
+                                                 catalogTable.name(), table_id,
+                                                 schema, columnNames,
                                                  pkey_index, indexes, partitionColumnIndex,
                                                  isExportEnabledForTable(catalogDatabase, table_id),
                                                  isTableExportOnly(catalogDatabase, table_id));

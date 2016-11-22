@@ -66,6 +66,7 @@ Table* TableFactory::getPersistentTable(
             voltdb::CatalogId databaseId,
             ExecutorContext *ctx,
             const std::string &name,
+            uint32_t table_id,
             TupleSchema* schema,
             const std::string* columnNames,
             int partitionColumn,
@@ -73,7 +74,7 @@ Table* TableFactory::getPersistentTable(
             bool exportOnly)
 {
     std::vector<TableIndexScheme> dummy;
-    return getPersistentTable(databaseId, ctx, name,
+    return getPersistentTable(databaseId, ctx, name, table_id,
                               schema, columnNames, dummy, partitionColumn,
                               exportEnabled, exportOnly);
 }
@@ -82,6 +83,7 @@ Table* TableFactory::getPersistentTable(
             voltdb::CatalogId databaseId,
             ExecutorContext *ctx,
             const std::string &name,
+            uint32_t table_id,
             TupleSchema* schema,
             const std::string* columnNames,
             const TableIndexScheme &pkey_index,
@@ -90,7 +92,7 @@ Table* TableFactory::getPersistentTable(
             bool exportOnly)
 {
     std::vector<TableIndexScheme> dummy;
-    return getPersistentTable(databaseId, ctx, name, schema, columnNames,
+    return getPersistentTable(databaseId, ctx, name, table_id, schema, columnNames,
                               pkey_index, dummy, partitionColumn,
                               exportEnabled, exportOnly);
 }
@@ -99,6 +101,7 @@ Table* TableFactory::getPersistentTable(
             voltdb::CatalogId databaseId,
             ExecutorContext *ctx,
             const std::string &name,
+            uint32_t table_id,
             TupleSchema* schema,
             const std::string* columnNames,
             const std::vector<TableIndexScheme> &indexes,
@@ -146,6 +149,7 @@ Table* TableFactory::getPersistentTable(
             voltdb::CatalogId databaseId,
             ExecutorContext *ctx,
             const std::string &name,
+            uint32_t table_id,
             TupleSchema* schema,
             const std::string* columnNames,
             const TableIndexScheme &pkeyIndex,
@@ -158,7 +162,7 @@ Table* TableFactory::getPersistentTable(
 
     if (exportOnly) {
         table = new StreamedTable(ctx, exportEnabled);
-        TableFactory::initCommon(databaseId, table, name, schema, columnNames, true);
+        TableFactory::initCommon(databaseId, table, name, table_id, schema, columnNames, true);
     }
     else {
         /**
@@ -174,7 +178,7 @@ Table* TableFactory::getPersistentTable(
 
         PersistentTable *pTable = dynamic_cast<PersistentTable*>(table);
         pTable->m_pkeyIndex = TableIndexFactory::getInstance(pkeyIndex);
-        TableFactory::initCommon(databaseId, pTable, name, schema, columnNames, true);
+        TableFactory::initCommon(databaseId, pTable, name, table_id, schema, columnNames, true);
         pTable->m_partitionColumn = partitionColumn;
 
         // one for pkey + all the other indexes
@@ -276,11 +280,13 @@ void TableFactory::initCommon(
         voltdb::CatalogId databaseId,
         Table *table,
         const std::string &name,
+        uint32_t table_id,
         TupleSchema *schema,
         const std::string *columnNames,
         const bool ownsTupleSchema) {
     table->m_databaseId = databaseId;
     table->m_name = name;
+    table->m_tableID = table_id;
     table->initializeWithColumns(schema, columnNames, ownsTupleSchema);
     assert (table->columnCount() == schema->columnCount());
 }

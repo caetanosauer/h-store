@@ -147,7 +147,7 @@ TableTuple keyTuple;
 /**
  * This value has to match the value in CopyOnWriteContext.cpp
  */
-#define TABLE_BLOCKSIZE 2097152
+#define TABLE_BLOCKSIZE 2097152 // 2MB
 #define MAX_EVICTED_TUPLE_SIZE 2500
 
 PersistentTable::PersistentTable(ExecutorContext *ctx, bool exportEnabled) :
@@ -155,9 +155,6 @@ PersistentTable::PersistentTable(ExecutorContext *ctx, bool exportEnabled) :
     m_indexes(NULL), m_indexCount(0), m_pkeyIndex(NULL), m_wrapper(NULL),
     m_tsSeqNo(0), stats_(this), m_exportEnabled(exportEnabled),
     m_COWContext(NULL)
-#ifdef FINELINE
-    , m_finelineLogger(ctx)
-#endif
 {
 
 #ifdef ANTICACHE
@@ -191,9 +188,6 @@ PersistentTable::PersistentTable(ExecutorContext *ctx, const std::string name, b
     m_indexes(NULL), m_indexCount(0), m_pkeyIndex(NULL), m_wrapper(NULL),
     m_tsSeqNo(0), stats_(this), m_exportEnabled(exportEnabled),
     m_COWContext(NULL)
-#ifdef FINELINE
-    , m_finelineLogger(ctx)
-#endif
 {
 
 #ifdef ANTICACHE
@@ -683,7 +677,7 @@ bool PersistentTable::insertTuple(TableTuple &source) {
 #endif
 
 #ifdef FINELINE
-    m_finelineLogger.log(LRType::Insert, m_tmpTarget1);
+    getLogger(m_tmpTarget1).log(LRType::Insert, m_tmpTarget1);
 #endif
 
     return true;
@@ -955,6 +949,10 @@ bool PersistentTable::deleteTuple(TableTuple &target, bool deleteAllocatedString
         size_t elMark = appendToELBuffer(target, m_tsSeqNo++, TupleStreamWrapper::DELETE);
         ptuda->setELMark(elMark);
     }
+
+#ifdef FINELINE
+    getLogger(m_tmpTarget1).log(LRType::Remove, m_tmpTarget1);
+#endif
 
     undoQuantum->registerUndoAction(ptuda);
     deleteTupleStorage(target);

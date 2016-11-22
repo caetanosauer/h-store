@@ -101,6 +101,12 @@ using LRType = foster::LRType;
 class FinelineLogger
 {
 public:
+    FinelineLogger(ExecutorContext* ctx, unsigned id)
+        : ctx_(ctx), seq_(0)
+    {
+        initialize(id);
+    }
+
     FinelineLogger(ExecutorContext* ctx)
         : ctx_(ctx), seq_(0), id_(get_next_id())
     {
@@ -477,7 +483,12 @@ protected:
     boost::scoped_ptr<RecoveryContext> m_recoveryContext;
 
 #ifdef FINELINE
-    FinelineLogger m_finelineLogger;
+    std::vector<FinelineLogger> m_finelineLoggers;
+
+    FinelineLogger& getLogger(TableTuple& tuple)
+    {
+        return m_finelineLoggers[tuple.getPageID()];
+    }
 #endif
 };
 
@@ -493,8 +504,10 @@ inline void PersistentTable::allocateNextBlock() {
 #else
     int bytes = m_tableAllocationTargetSize;
 #endif
+
     char *memory = (char*)(new char[bytes]);
     m_data.push_back(memory);
+
 #ifdef ANTICACHE_TIMESTAMPS_PRIME
     m_evictPosition.push_back(0);
     m_stepPrime.push_back(-1);
@@ -503,6 +516,7 @@ inline void PersistentTable::allocateNextBlock() {
     assert(m_allocatedTuplePointers.insert(memory).second);
     m_deletedTuplePointers.erase(memory);
 #endif
+
     m_allocatedTuples += m_tuplesPerBlock;
     if (m_tempTableMemoryInBytes) {
         (*m_tempTableMemoryInBytes) += bytes;
@@ -512,6 +526,22 @@ inline void PersistentTable::allocateNextBlock() {
                                " executing SQL. Aborting.");
         }
     }
+
+#ifdef FINELINE
+    auto page_id = static_cast<uint32_t>(m_data.size());
+    if (page_id >= 1 << 24) {
+        VOLT_ERROR("FineLine module only supports 2^24 pages per table");
+    }
+    auto logger_id = (m_tableID << 24) | page_id;
+    m_finelineLoggers.emplace_back(m_executorContext, logger_id);
+    assert(m_finelineLoggers.size() == page_id);
+
+    // Initialize page ID field on each tuple -- use m_tmpTarget2 as handle
+    for (unsigned i = 0; i < m_tuplesPerBlock; i++) {
+        m_tmpTarget2.move(memory + (i * m_tupleLength));
+        m_tmpTarget2.setPageID(page_id);
+    }
+#endif
 }
 
 

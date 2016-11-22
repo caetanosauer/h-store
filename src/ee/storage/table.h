@@ -228,6 +228,9 @@ public:
     
     int getTupleID(const char* tuple_address); 
 
+    uint32_t getTableID() { return m_tableID; }
+
+
     // ------------------------------------------------------------------
     // COLUMNS
     // ------------------------------------------------------------------
@@ -391,6 +394,11 @@ protected:
     uint32_t m_tupleLength;
     int64_t m_nonInlinedMemorySize;
     
+#ifdef FINELINE
+    // Intitialized by TableFactory::initCommon
+    uint32_t m_tableID;
+#endif
+
     // pointers to chunks of data
     std::vector<char*> m_data;
 

@@ -80,6 +80,7 @@ namespace voltdb {
         static Table* getPersistentTable( voltdb::CatalogId databaseId,
                                          ExecutorContext *ctx,
                                          const std::string &name,
+                                         uint32_t table_id,
                                          TupleSchema* schema,
                                          const std::string* columnNames,
                                          int partitionColumn,
@@ -92,6 +93,7 @@ namespace voltdb {
         static Table* getPersistentTable(voltdb::CatalogId databaseId,
                                          ExecutorContext *ctx,
                                          const std::string &name,
+                                         uint32_t table_id,
                                          TupleSchema* schema,
                                          const std::string* columnNames,
                                          const TableIndexScheme &pkey_index,
@@ -106,6 +108,7 @@ namespace voltdb {
         static Table* getPersistentTable(voltdb::CatalogId databaseId,
                                          ExecutorContext *ctx,
                                          const std::string &name,
+                                         uint32_t table_id,
                                          TupleSchema* schema,
                                          const std::string* columnNames,
                                          const std::vector<TableIndexScheme> &indexes,
@@ -120,6 +123,7 @@ namespace voltdb {
         static Table* getPersistentTable( voltdb::CatalogId databaseId,
                                          ExecutorContext *ctx,
                                          const std::string &name,
+                                         uint32_t table_id,
                                          TupleSchema* schema,
                                          const std::string* columnNames,
                                          const TableIndexScheme &pkeyIndex,
@@ -168,6 +172,25 @@ namespace voltdb {
                                voltdb::CatalogId databaseId,
                                Table *table,
                                const std::string &name,
+                               TupleSchema *schema,
+                               const std::string *columnNames,
+                               const bool ownsTupleSchema)
+        {
+            initCommon(
+                    databaseId,
+                    table,
+                    name,
+                    std::numeric_limits<uint32_t>::max(), // TABLE ID
+                    schema,
+                    columnNames,
+                    ownsTupleSchema);
+        }
+
+        static void initCommon(
+                               voltdb::CatalogId databaseId,
+                               Table *table,
+                               const std::string &name,
+                               uint32_t table_id,
                                TupleSchema *schema,
                                const std::string *columnNames,
                                const bool ownsTupleSchema);
