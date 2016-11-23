@@ -474,7 +474,7 @@ JAR BUILDING
 ******************************************************************************
 -->
 
-<target name="buildinfo">
+<target name="buildinfo" unless="dist.version">
   <loadfile property='dist.version' srcFile='version.txt'>
       <filterchain><striplinebreaks/></filterchain>
   </loadfile>
@@ -687,6 +687,41 @@ JAVA COMPILATION
     <delete dir="${build.prod.dir}/META-INF/"/>
 
 <!--     <antcall target="log4j_properties" /> -->
+</target>
+	
+
+<target name="compile-quick" depends="getjava">
+
+	    <depend
+	        srcdir="${src.frontend.dir}:${src.benchmarks.dir}:${src.test.dir}"
+	        destdir="${build.prod.dir}:${build.test.dir}"
+	        cache="${depcache}">
+	        <classpath refid="project.classpath" />
+	    </depend>
+
+	    <javac includeantruntime="false"
+	        source="${global.jvm_version}"
+	        target="${global.jvm_version}"
+	        srcdir="${src.frontend.dir}"
+	        destdir='${build.prod.dir}'
+	        debug='true'>
+	        <compilerarg line="-encoding utf-8"/>
+	        <classpath refid="project.classpath" />
+	    </javac>
+	    
+	    <javac includeantruntime="false"
+	        source="${global.jvm_version}"
+	        target="${global.jvm_version}"
+	        srcdir="${src.benchmarks.dir}"
+	        destdir='${build.benchmarks.dir}'
+	        debug='true'>
+	        <compilerarg line="-encoding utf-8"/>
+	        <classpath refid="project.classpath" />
+	    </javac>
+
+	    <delete dir="${build.prod.dir}/META-INF/"/>
+
+	<!--     <antcall target="log4j_properties" /> -->
 </target>
 
 <!--<target name="log4j_properties.check">
