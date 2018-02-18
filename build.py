@@ -112,6 +112,8 @@ if CTX.FINELINE:
     CTX.INCLUDE_DIRS += ['src/ee/fineline/src',
             'src/ee/fineline/foster-btree/src', 
             'src/ee/fineline/foster-btree/third-party/spdlog/include'
+            'src/ee/zero/src/common'
+            'src/ee/zero/src/sm'
     ]
     CTX.LDFLAGS += " -lsqlite3 -lboost_regex -lboost_system -lboost_filesystem -lboost_program_options "
 
@@ -518,6 +520,31 @@ if CTX.FINELINE:
             sys.exit(-1)
 
         retval = os.system("make -j%d legacy fineline" % numHardwareThreads)
+        print("Make returned: ", retval)
+        if retval != 0:
+            sys.exit(-1)
+
+    zeroPath = "src/ee/zero/build"
+    if not os.path.exists(zeroPath):
+        os.mkdir(zeroPath)
+
+    CTX.THIRD_PARTY_STATIC_LIBS.extend([
+        "../../src/ee/zero/build/src/sm/libsm.a",
+        "../../src/ee/zero/build/src/common/libcommon.a",
+        ])
+
+    with pushd(zeroPath):
+        cmakeArgs = ""
+        if CTX.LEVEL == "DEBUG":
+            print("CMake DEBUG flag is on")
+            cmakeArgs = "-DCMAKE_BUILD_TYPE=Debug3"
+
+        retval = os.system("cmake .. %s" % cmakeArgs)
+        print("CMake returned: ", retval)
+        if retval != 0:
+            sys.exit(-1)
+
+        retval = os.system("make -j%d sm" % numHardwareThreads)
         print("Make returned: ", retval)
         if retval != 0:
             sys.exit(-1)

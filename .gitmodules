@@ -1,3 +1,6 @@
 [submodule "fineline"]
 	path = src/ee/fineline
 	url = git@github.com:caetanosauer/fineline.git
+[submodule "src/ee/zero"]
+	path = src/ee/zero
+	url = git@github.com:caetanosauer/zero.git
